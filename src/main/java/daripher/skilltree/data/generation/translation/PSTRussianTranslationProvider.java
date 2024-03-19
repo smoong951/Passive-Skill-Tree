@@ -328,7 +328,7 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add(LootDuplicationBonus.LootType.FISHING.getDescriptionId(), "Награды с рыбалки");
     add(LootDuplicationBonus.LootType.GEMS.getDescriptionId(), "Самоцветы из руды");
     // living conditions
-    add(PSTLivingConditions.EFFECT_AMOUNT.get(), "target.you", "Вас есть");
+    add(PSTLivingConditions.EFFECT_AMOUNT.get(), "target.you", "Вас");
     add(PSTLivingConditions.EFFECT_AMOUNT.get(), "target.target", "Цели");
     add(PSTLivingConditions.EFFECT_AMOUNT.get(), "min.1", "%s если на %s есть Эффекты");
     add(PSTLivingConditions.EFFECT_AMOUNT.get(), "min", "%s если на %s минимум %d Эффектов");
