@@ -248,13 +248,11 @@ public class SkillBonusHandler {
   public static void addCraftedItemSkillBonusTooltips(ItemTooltipEvent event) {
     List<Component> components = event.getToolTip();
     for (ItemBonus<?> itemBonus : ItemHelper.getItemBonusesExcludingGems(event.getItemStack())) {
-      if (itemBonus instanceof ItemSkillBonus skillBonus) {
-        SkillBonus<?> bonus = skillBonus.getBonus();
-        if (bonus instanceof AttributeBonus) {
-          MutableComponent tooltip = bonus.getTooltip();
-          components.add(tooltip);
-        }
-      }
+      if (!(itemBonus instanceof ItemSkillBonus skillBonus)) continue;
+      SkillBonus<?> bonus = skillBonus.getBonus();
+      if (bonus instanceof AttributeBonus) continue;
+      MutableComponent tooltip = bonus.getTooltip();
+      components.add(tooltip);
     }
   }
 
