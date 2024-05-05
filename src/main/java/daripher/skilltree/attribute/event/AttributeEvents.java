@@ -172,7 +172,9 @@ public class AttributeEvents {
     if (!EquipmentCondition.isRangedWeapon(event.getItem())) return;
     AttributeInstance attribute = event.getEntity().getAttribute(Attributes.ATTACK_SPEED);
     if (attribute == null) return;
-    double attackSpeedBonus = attribute.getValue() / attribute.getBaseValue() - 1;
+    double baseAttackSpeed = attribute.getBaseValue();
+    if (baseAttackSpeed == 0) return;
+    double attackSpeedBonus = attribute.getValue() / baseAttackSpeed - 1;
     if (attackSpeedBonus == 0) return;
     int tickBonus = attackSpeedBonus < 0 ? 1 : -1;
     while (attackSpeedBonus > 1) {
