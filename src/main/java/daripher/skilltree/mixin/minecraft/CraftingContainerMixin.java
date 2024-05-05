@@ -15,7 +15,9 @@ public class CraftingContainerMixin implements Interactive {
 
   @Override
   public @Nullable Player getUser() {
-    return ((Interactive) menu).getUser();
+    Interactive menu = (Interactive) this.menu;
+    if (menu == null) return null;
+    return menu.getUser();
   }
 
   @Override
