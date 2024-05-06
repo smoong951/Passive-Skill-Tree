@@ -47,6 +47,7 @@ public class NetworkHelper {
     writeSkillBonuses(buf, skill.getBonuses());
     writeResourceLocations(buf, skill.getLongConnections());
     writeResourceLocations(buf, skill.getOneWayConnections());
+    writeTags(buf, skill.getTags());
   }
 
   public static PassiveSkill readPassiveSkill(FriendlyByteBuf buf) {
@@ -65,6 +66,8 @@ public class NetworkHelper {
     readSkillBonuses(buf).forEach(skill::addSkillBonus);
     readResourceLocations(buf).forEach(skill.getLongConnections()::add);
     readResourceLocations(buf).forEach(skill.getOneWayConnections()::add);
+    skill.getTags().clear();
+    skill.getTags().addAll(readTags(buf));
     return skill;
   }
 
@@ -132,6 +135,22 @@ public class NetworkHelper {
     return locations;
   }
 
+  private static void writeTags(FriendlyByteBuf buf, List<String> tags) {
+    buf.writeInt(tags.size());
+    for (String tag : tags) {
+      buf.writeUtf(tag);
+    }
+  }
+
+  private static List<String> readTags(FriendlyByteBuf buf) {
+    List<String> tags = new ArrayList<>();
+    int size = buf.readInt();
+    for (int i = 0; i < size; i++) {
+      tags.add(buf.readUtf());
+    }
+    return tags;
+  }
+
   public static void writeSkillBonuses(FriendlyByteBuf buf, List<SkillBonus<?>> bonuses) {
     buf.writeInt(bonuses.size());
     bonuses.forEach(bonus -> writeSkillBonus(buf, bonus));
@@ -193,13 +212,32 @@ public class NetworkHelper {
   public static void writePassiveSkillTree(FriendlyByteBuf buf, PassiveSkillTree skillTree) {
     buf.writeUtf(skillTree.getId().toString());
     writeResourceLocations(buf, skillTree.getSkillIds());
+    writeTagLimits(buf, skillTree.getSkillLimitations());
   }
 
   public static PassiveSkillTree readPassiveSkillTree(FriendlyByteBuf buf) {
     ResourceLocation id = new ResourceLocation(buf.readUtf());
     PassiveSkillTree skillTree = new PassiveSkillTree(id);
     readResourceLocations(buf).forEach(skillTree.getSkillIds()::add);
+    readTagLimits(buf).forEach(skillTree.getSkillLimitations()::put);
     return skillTree;
+  }
+
+  private static void writeTagLimits(FriendlyByteBuf buf, Map<String, Integer> limits) {
+    buf.writeInt(limits.size());
+    for (Map.Entry<String, Integer> entry : limits.entrySet()) {
+      buf.writeUtf(entry.getKey());
+      buf.writeInt(entry.getValue());
+    }
+  }
+
+  private static Map<String, Integer> readTagLimits(FriendlyByteBuf buf) {
+    Map<String, Integer> limits = new HashMap<>();
+    int size = buf.readInt();
+    for (int i = 0; i < size; i++) {
+      limits.put(buf.readUtf(), buf.readInt());
+    }
+    return limits;
   }
 
   public static void writeLivingMultiplier(
@@ -260,8 +298,8 @@ public class NetworkHelper {
     return Objects.requireNonNull(serializer).deserialize(buf);
   }
 
-  public static void writeEventListener(FriendlyByteBuf buf,
-                                        @Nonnull SkillEventListener condition) {
+  public static void writeEventListener(
+      FriendlyByteBuf buf, @Nonnull SkillEventListener condition) {
     SkillEventListener.Serializer serializer = condition.getSerializer();
     ResourceLocation serializerId = PSTRegistries.EVENT_LISTENERS.get().getKey(serializer);
     buf.writeUtf(Objects.requireNonNull(serializerId).toString());

@@ -117,7 +117,7 @@ public class SkillTreeEditorScreen extends Screen {
     float tooltipY = mouseY + (prevMouseY - mouseY) * partialTick;
     if (skillAtMouse == null) return;
     ScreenHelper.renderSkillTooltip(
-        skillAtMouse, poseStack, tooltipX, tooltipY, width, height, itemRenderer);
+        skillTree, skillAtMouse, poseStack, tooltipX, tooltipY, width, height, itemRenderer);
   }
 
   private void renderSkills(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
@@ -382,6 +382,7 @@ public class SkillTreeEditorScreen extends Screen {
       case BUTTON -> addButtonTools();
       case BONUSES -> addBonusesTools();
       case NODE -> addNodeToolsButtons();
+      case TAGS -> addTagsToolsButtons();
       case CONNECTIONS -> addConnectionToolsButton();
     }
     toolsY += 5;
@@ -463,23 +464,23 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addMainTools() {
-    int buttonsWidth = 200;
-    addButton(0, 0, buttonsWidth, 14, "Bonuses").setPressFunc(b -> selectTools(Tools.BONUSES));
+    addButton(0, 0, 200, 14, "Bonuses").setPressFunc(b -> selectTools(Tools.BONUSES));
     shiftWidgets(0, 19);
-    addButton(0, 0, buttonsWidth, 14, "Textures").setPressFunc(b -> selectTools(Tools.TEXTURES));
+    addButton(0, 0, 200, 14, "Textures").setPressFunc(b -> selectTools(Tools.TEXTURES));
     shiftWidgets(0, 19);
-    addButton(0, 0, buttonsWidth, 14, "Button").setPressFunc(b -> selectTools(Tools.BUTTON));
+    addButton(0, 0, 200, 14, "Button").setPressFunc(b -> selectTools(Tools.BUTTON));
     shiftWidgets(0, 19);
     if (!selectedSkills.isEmpty()) {
-      addButton(0, 0, buttonsWidth, 14, "New Skill").setPressFunc(b -> selectTools(Tools.NODE));
+      addButton(0, 0, 200, 14, "New Skill").setPressFunc(b -> selectTools(Tools.NODE));
+      shiftWidgets(0, 19);
+      addButton(0, 0, 200, 14, "Tags").setPressFunc(b -> selectTools(Tools.TAGS));
       shiftWidgets(0, 19);
     }
     if (selectedSkills.size() >= 2) {
-      addButton(0, 0, buttonsWidth, 14, "Connections")
-          .setPressFunc(b -> selectTools(Tools.CONNECTIONS));
+      addButton(0, 0, 200, 14, "Connections").setPressFunc(b -> selectTools(Tools.CONNECTIONS));
       shiftWidgets(0, 19);
     }
-    addConfirmationButton(0, 0, buttonsWidth, 14, "Remove", "Confirm")
+    addConfirmationButton(0, 0, 200, 14, "Remove", "Confirm")
         .setPressFunc(b -> removeSelectedSkills());
     shiftWidgets(0, 19);
   }
@@ -490,7 +491,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addNodeToolsButtons() {
-    addButton(0, 0, 100, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
     shiftWidgets(0, 29);
     if (selectedSkills.isEmpty()) return;
     addLabel(0, 0, "Distance", ChatFormatting.GOLD);
@@ -502,6 +503,59 @@ public class SkillTreeEditorScreen extends Screen {
     addButton(0, 0, 60, 14, "Add").setPressFunc(b -> createNewSkills(angleEditor, distanceEditor));
     addButton(65, 0, 60, 14, "Copy")
         .setPressFunc(b -> createSelectedSkillsCopies(angleEditor, distanceEditor));
+    toolsY += 19;
+  }
+
+  private void addTagsToolsButtons() {
+    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    shiftWidgets(0, 29);
+    if (selectedSkills.isEmpty()) return;
+    PassiveSkill skill = getFirstSelectedSkill();
+    if (selectedSkills().anyMatch(otherSkill -> !sameTags(skill, otherSkill))) return;
+    addLabel(0, 0, "Tag", ChatFormatting.GOLD);
+    addLabel(110, 0, "Limit", ChatFormatting.GOLD);
+    toolsY += 19;
+    List<String> tags = getFirstSelectedSkill().getTags();
+    for (int i = 0; i < tags.size(); i++) {
+      int index = i;
+      addTextField(0, 0, 90, 14, tags.get(i))
+          .setResponder(
+              v -> {
+                selectedSkills().forEach(s -> s.getTags().set(index, v));
+                saveSelectedSkills();
+              });
+      int limit = skillTree.getSkillLimitations().getOrDefault(tags.get(i), 0);
+      addNumericTextField(110, 0, 40, 14, limit)
+          .setNumericFilter(d -> d >= 0)
+          .setNumericResponder(
+              v -> {
+                String tag = getFirstSelectedSkill().getTags().get(index);
+                if (v == 0) {
+                  skillTree.getSkillLimitations().remove(tag);
+                } else {
+                  skillTree.getSkillLimitations().put(tag, v.intValue());
+                }
+                SkillTreeClientData.saveEditorSkillTree(skillTree);
+              });
+      toolsY += 19;
+    }
+    toolsY += 10;
+    addButton(0, 0, 90, 14, "Add")
+        .setPressFunc(
+            b -> {
+              selectedSkills().forEach(s -> s.getTags().add(""));
+              saveSelectedSkills();
+              rebuildWidgets();
+            });
+    if (!tags.isEmpty()) {
+      addButton(110, 0, 90, 14, "Remove")
+          .setPressFunc(
+              b -> {
+                selectedSkills().forEach(s -> s.getTags().remove(tags.size() - 1));
+                saveSelectedSkills();
+                rebuildWidgets();
+              });
+    }
     toolsY += 19;
   }
 
@@ -579,7 +633,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addButtonTools() {
-    addButton(0, 0, 100, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
     shiftWidgets(0, 29);
     PassiveSkill firstSelectedSkill = getFirstSelectedSkill();
     if (canEdit(PassiveSkill::getButtonSize)) {
@@ -688,7 +742,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addTexturesTools() {
-    addButton(0, 0, 100, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
     shiftWidgets(0, 29);
     PassiveSkill skill = getFirstSelectedSkill();
     if (canEdit(PassiveSkill::getBackgroundTexture)) {
@@ -731,7 +785,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addConnectionToolsButton() {
-    addButton(0, 0, 100, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
     shiftWidgets(0, 29);
     if (selectedSkills.size() < 2) return;
     if (selectedSkillsConnected()) {
@@ -816,7 +870,7 @@ public class SkillTreeEditorScreen extends Screen {
     SkillButton button =
         new SkillButton(() -> 0f, getSkillButtonX(skill), getSkillButtonY(skill), skill);
     addRenderableWidget(button);
-    button.highlighted = true;
+    button.skillLearned = true;
     skillButtons.put(skill.getId(), button);
     float skillX = skill.getPositionX();
     float skillY = skill.getPositionY();
@@ -1108,6 +1162,17 @@ public class SkillTreeEditorScreen extends Screen {
     return true;
   }
 
+  protected boolean sameTags(PassiveSkill skill, PassiveSkill otherSkill) {
+    if (skill == otherSkill) return true;
+    List<String> tags = skill.getTags();
+    List<String> otherTags = otherSkill.getTags();
+    if (tags.size() != otherTags.size()) return false;
+    for (int i = 0; i < tags.size(); i++) {
+      if (!tags.get(i).equals(otherTags.get(i))) return false;
+    }
+    return true;
+  }
+
   protected final boolean canEdit(Function<PassiveSkill, ?> function) {
     return selectedSkills().map(function).distinct().count() <= 1;
   }
@@ -1118,6 +1183,7 @@ public class SkillTreeEditorScreen extends Screen {
     TEXTURES,
     BUTTON,
     CONNECTIONS,
+    TAGS,
     NODE
   }
 }

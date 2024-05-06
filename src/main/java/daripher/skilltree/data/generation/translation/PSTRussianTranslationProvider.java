@@ -694,6 +694,7 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add("widget.show_stats", "Список бонусов");
     add("key.categories.skilltree", "Древо пассивных умений");
     add("key.display_skill_tree", "Открыть древо пассивных умений");
+    add("skill.limitation", "Ограничение: %s");
     // jei info
     add(
         "skilltree.jei.gem_info",

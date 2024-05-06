@@ -7,6 +7,7 @@ import com.mojang.math.Vector3f;
 import daripher.skilltree.client.tooltip.TooltipHelper;
 import daripher.skilltree.client.widget.SkillButton;
 import daripher.skilltree.client.widget.SkillConnection;
+import daripher.skilltree.skill.PassiveSkillTree;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -74,6 +75,7 @@ public class ScreenHelper {
   }
 
   public static void renderSkillTooltip(
+      PassiveSkillTree skillTree,
       SkillButton button,
       PoseStack poseStack,
       float x,
@@ -84,7 +86,7 @@ public class ScreenHelper {
     Font font = Minecraft.getInstance().font;
     int maxWidth = width - 10;
     List<MutableComponent> tooltip = new ArrayList<>();
-    for (MutableComponent component : button.getTooltip()) {
+    for (MutableComponent component : button.getTooltip(skillTree)) {
       if (font.width(component) > maxWidth) {
         tooltip.addAll(TooltipHelper.split(component, font, maxWidth));
       } else {
@@ -214,11 +216,11 @@ public class ScreenHelper {
     float rotation = ScreenHelper.getAngleBetweenButtons(button1, button2);
     poseStack.mulPose(Vector3f.ZP.rotation(rotation));
     int length = (int) ScreenHelper.getDistanceBetweenButtons(button1, button2);
-    boolean highlighted = button1.highlighted && button2.highlighted;
+    boolean highlighted = button1.skillLearned && button2.skillLearned;
     poseStack.scale(1F, zoom, 1F);
     GuiComponent.blit(poseStack, 0, -3, length, 6, 0, highlighted ? 0 : 6, length, 6, 50, 12);
     boolean shouldAnimate =
-        button1.highlighted && button2.animated || button2.highlighted && button1.animated;
+        button1.skillLearned && button2.canLearn || button2.skillLearned && button1.canLearn;
     if (!highlighted && shouldAnimate) {
       RenderSystem.setShaderColor(1F, 1F, 1F, (Mth.sin(animation / 3F) + 1) / 2);
       GuiComponent.blit(poseStack, 0, -3, length, 6, 0, 0, length, 6, 50, 12);

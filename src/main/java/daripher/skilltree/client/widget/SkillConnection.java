@@ -11,20 +11,6 @@ public class SkillConnection {
     this.button2 = button2;
   }
 
-  public void setActive() {
-    if (button1.highlighted == button2.highlighted) return;
-    if (type != Type.ONE_WAY) {
-      if (!button1.highlighted) {
-        button1.setAnimated();
-        button1.setActive();
-      }
-    }
-    if (!button2.highlighted) {
-      button2.setAnimated();
-      button2.setActive();
-    }
-  }
-
   public SkillButton getFirstButton() {
     return button1;
   }

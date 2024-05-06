@@ -609,6 +609,7 @@ public class PSTEnglishTranslationProvider extends PSTTranslationProvider {
     add("widget.show_stats", "Show Stats");
     add("key.categories.skilltree", "Passive Skill Tree");
     add("key.display_skill_tree", "Open Skill Tree");
+    add("skill.limitation", "Limited to: %s");
     // jei info
     add(
         "skilltree.jei.gem_info",

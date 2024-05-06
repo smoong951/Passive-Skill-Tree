@@ -357,6 +357,7 @@
   "recipe.skilltree.potion_mixing.info": "(Combine two different potions on a Crafting Bench to create a mixture)",
   "recipe.skilltree.weapon_poisoning": "Weapon Poisoning",
   "recipe.skilltree.weapon_poisoning.info": "(Combine a Melee Weapon and a Harmful Potion on a Crafting Bench to poison a weapon)",
+  "skill.limitation": "Limited to: %s",
   "skill.skilltree.alchemist_class.name": "Alchemist",
   "skill.skilltree.alchemist_crafting_1.name": "Crafted Potions Amplification",
   "skill.skilltree.alchemist_crafting_2.name": "Crafted Potions Amplification",

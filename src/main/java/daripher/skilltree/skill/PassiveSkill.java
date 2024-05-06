@@ -14,6 +14,7 @@ public class PassiveSkill {
   private @Nullable List<ResourceLocation> directConnections = new ArrayList<>();
   private @Nullable List<ResourceLocation> longConnections = new ArrayList<>();
   private @Nullable List<ResourceLocation> oneWayConnections = new ArrayList<>();
+  private @Nullable List<String> tags = new ArrayList<>();
   private ResourceLocation backgroundTexture;
   private ResourceLocation iconTexture;
   private ResourceLocation borderTexture;
@@ -118,26 +119,26 @@ public class PassiveSkill {
 
   @Nonnull
   public List<ResourceLocation> getDirectConnections() {
-    if (directConnections == null) {
-      directConnections = new ArrayList<>();
-    }
+    if (directConnections == null) return directConnections = new ArrayList<>();
     return directConnections;
   }
 
   @Nonnull
   public List<ResourceLocation> getLongConnections() {
-    if (longConnections == null) {
-      longConnections = new ArrayList<>();
-    }
+    if (longConnections == null) return longConnections = new ArrayList<>();
     return longConnections;
   }
 
   @Nonnull
   public List<ResourceLocation> getOneWayConnections() {
-    if (oneWayConnections == null) {
-      oneWayConnections = new ArrayList<>();
-    }
+    if (oneWayConnections == null) return oneWayConnections = new ArrayList<>();
     return oneWayConnections;
+  }
+
+  @Nonnull
+  public List<String> getTags() {
+    if (tags == null) return tags = new ArrayList<>();
+    return tags;
   }
 
   public @Nonnull String getTitle() {

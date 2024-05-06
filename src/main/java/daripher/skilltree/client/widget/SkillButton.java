@@ -4,13 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import daripher.skilltree.client.screen.ScreenHelper;
+import daripher.skilltree.client.tooltip.TooltipHelper;
 import daripher.skilltree.config.ClientConfig;
 import daripher.skilltree.skill.PassiveSkill;
+import daripher.skilltree.skill.PassiveSkillTree;
 import daripher.skilltree.skill.bonus.SkillBonus;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -33,8 +36,8 @@ public class SkillButton extends Button {
   public final PassiveSkill skill;
   public float x;
   public float y;
-  public boolean highlighted;
-  public boolean animated;
+  public boolean skillLearned;
+  public boolean canLearn;
   public boolean searched;
 
   public SkillButton(Supplier<Float> animationFunc, float x, float y, PassiveSkill skill) {
@@ -70,19 +73,19 @@ public class SkillButton extends Button {
     RenderSystem.setShaderTexture(0, skill.getBackgroundTexture());
     float animation = (Mth.sin(animationFunction.get() / 3F) + 1) / 2;
     float rb = searched ? 0.1f : 1f;
-    if (animated || searched) {
+    if (canLearn || searched) {
       RenderSystem.setShaderColor(rb, 1F, rb, 1 - animation);
     }
-    if (!highlighted) {
+    if (!skillLearned) {
       renderDarkening(poseStack);
     }
-    if (animated || searched) {
+    if (canLearn || searched) {
       RenderSystem.setShaderColor(rb, 1F, rb, animation);
     }
-    if (highlighted || animated || searched) {
+    if (skillLearned || canLearn || searched) {
       renderFrame(poseStack);
     }
-    if (animated || searched) {
+    if (canLearn || searched) {
       RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     }
     poseStack.popPose();
@@ -134,9 +137,10 @@ public class SkillButton extends Button {
     width = height = size;
   }
 
-  public List<MutableComponent> getTooltip() {
+  public List<MutableComponent> getTooltip(PassiveSkillTree skillTree) {
     ArrayList<MutableComponent> tooltip = new ArrayList<>();
     addTitleTooltip(tooltip);
+    addLimitationsTooltip(skillTree, tooltip);
     addDescriptionTooltip(tooltip);
     addInfoTooltip(tooltip);
     addLoreTooltip(tooltip);
@@ -190,6 +194,26 @@ public class SkillButton extends Button {
     tooltip.add(loreComponent.withStyle(LORE_STYLE));
   }
 
+  private void addLimitationsTooltip(
+      PassiveSkillTree skillTree, ArrayList<MutableComponent> tooltips) {
+    for (String tag : skill.getTags()) {
+      int limit = skillTree.getSkillLimitations().getOrDefault(tag, 0);
+      if (limit > 0) {
+        AtomicReference<MutableComponent> tagTooltip =
+            new AtomicReference<>(Component.literal(tag));
+        TooltipHelper.consumeTranslated("skill.tag.%s.name".formatted(tag), tagTooltip::set);
+        tagTooltip.set(Component.literal(limit + " " + tagTooltip.get().getString()));
+        tagTooltip.set(tagTooltip.get().withStyle(TooltipHelper.getItemBonusStyle(true)));
+        MutableComponent tooltip = Component.translatable("skill.limitation", tagTooltip.get());
+        tooltip = tooltip.withStyle(TooltipHelper.getSkillBonusStyle(true));
+        tooltips.add(tooltip);
+      }
+    }
+    if (!skill.getTags().isEmpty()) {
+      tooltips.add(Component.empty());
+    }
+  }
+
   protected void addTitleTooltip(List<MutableComponent> tooltip) {
     MutableComponent title;
     if (skill.getTitle().isEmpty()) {
@@ -225,8 +249,8 @@ public class SkillButton extends Button {
     return component.withStyle(DESCRIPTION_STYLE);
   }
 
-  public void setAnimated() {
-    animated = true;
+  public void setCanLearn() {
+    canLearn = true;
   }
 
   public void setActive() {
