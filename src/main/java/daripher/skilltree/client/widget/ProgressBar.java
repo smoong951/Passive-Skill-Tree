@@ -3,8 +3,8 @@ package daripher.skilltree.client.widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import daripher.skilltree.capability.skill.IPlayerSkills;
 import daripher.skilltree.capability.skill.PlayerSkillsProvider;
+import daripher.skilltree.client.data.SkillTreeClientData;
 import daripher.skilltree.client.screen.ScreenHelper;
-import daripher.skilltree.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.player.LocalPlayer;
@@ -27,7 +27,7 @@ public class ProgressBar extends Button {
   }
 
   private static boolean isMaxLevel(int currentLevel) {
-    return currentLevel >= Config.max_skill_points;
+    return currentLevel >= SkillTreeClientData.max_skill_points;
   }
 
   @Override
@@ -51,7 +51,7 @@ public class ProgressBar extends Button {
 
   protected void renderProgress(PoseStack poseStack) {
     if (showProgressInNumbers) {
-      int cost = Config.getSkillPointCost(getCurrentLevel());
+      int cost = SkillTreeClientData.getSkillPointCost(getCurrentLevel());
       int exp = getLocalPlayer().totalExperience;
       String text = exp + "/" + cost;
       ScreenHelper.drawCenteredOutlinedText(poseStack, text, x + width / 2, getTextY(), 0xFCE266);
@@ -84,8 +84,8 @@ public class ProgressBar extends Button {
   private float getExperienceProgress() {
     int level = getCurrentLevel();
     float progress = 1F;
-    if (level < Config.max_skill_points) {
-      int levelupCost = Config.getSkillPointCost(level);
+    if (level < SkillTreeClientData.max_skill_points) {
+      int levelupCost = SkillTreeClientData.getSkillPointCost(level);
       progress = (float) getLocalPlayer().totalExperience / levelupCost;
       progress = Math.min(1F, progress);
     }
