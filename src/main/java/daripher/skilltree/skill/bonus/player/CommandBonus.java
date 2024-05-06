@@ -92,23 +92,23 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
     editor.addLabel(0, 0, "Command", ChatFormatting.GOLD);
     editor.shiftWidgets(0, 19);
     editor
-        .addTextField(0, 0, 200, 14, command)
+        .addTextArea(0, 0, 200, 140, command)
         .setResponder(
             c -> {
               setCommand(c);
               consumer.accept(this.copy());
             });
-    editor.shiftWidgets(0, 19);
+    editor.shiftWidgets(0, 145);
     editor.addLabel(0, 0, "Remove Command", ChatFormatting.GOLD);
     editor.shiftWidgets(0, 19);
     editor
-        .addTextField(0, 0, 200, 14, removeCommand)
+        .addTextArea(0, 0, 200, 140, removeCommand)
         .setResponder(
             c -> {
               setRemoveCommand(c);
               consumer.accept(this.copy());
             });
-    editor.shiftWidgets(0, 19);
+    editor.shiftWidgets(0, 145);
   }
 
   public void setCommand(@Nonnull String command) {

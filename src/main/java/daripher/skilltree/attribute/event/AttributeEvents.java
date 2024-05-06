@@ -156,8 +156,8 @@ public class AttributeEvents {
     double stealth = player.getAttributeValue(PSTAttributes.STEALTH.get()) / 100d;
     if (stealth == 0) return;
     LivingEntity attacker = event.getEntity();
-    if (attacker.distanceTo(player)
-        > attacker.getAttributeValue(Attributes.FOLLOW_RANGE) * (1 - stealth)) {
+    double followRange = attacker.getAttributeValue(Attributes.FOLLOW_RANGE);
+    if (attacker.distanceTo(player) > followRange * (1 - stealth)) {
       event.setCanceled(true);
     }
   }

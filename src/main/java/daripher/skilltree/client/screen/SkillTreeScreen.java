@@ -54,7 +54,7 @@ public class SkillTreeScreen extends Screen {
   private Button buyButton;
   private Label pointsInfo;
   private ProgressBar progressBar;
-  private SkillBonusList statsInfo;
+  private ScrollableComponentList statsInfo;
   private boolean firstInitDone;
   private boolean showStats;
   private boolean showProgressInNumbers;
@@ -88,8 +88,8 @@ public class SkillTreeScreen extends Screen {
     }
     if (!firstInitDone) firstInit();
     addSkillButtons();
-    statsInfo = new SkillBonusList(48, height - 60);
-    statsInfo.setStats(getMergedSkillBonusesTooltips());
+    statsInfo = new ScrollableComponentList(48, height - 60);
+    statsInfo.setComponents(getMergedSkillBonusesTooltips());
     addRenderableWidget(statsInfo);
     maxScrollX -= width / 2 - 80;
     maxScrollY -= height / 2 - 80;
@@ -295,7 +295,7 @@ public class SkillTreeScreen extends Screen {
     return null;
   }
 
-  private List<MutableComponent> getMergedSkillBonusesTooltips() {
+  private List<Component> getMergedSkillBonusesTooltips() {
     List<SkillBonus<?>> bonuses = new ArrayList<>();
     learnedSkills.stream()
         .map(skillButtons::get)
@@ -303,7 +303,11 @@ public class SkillTreeScreen extends Screen {
         .map(PassiveSkill::getBonuses)
         .flatMap(List::stream)
         .forEach(b -> addToMergeList(b, bonuses));
-    return bonuses.stream().sorted().map(SkillBonus::getTooltip).toList();
+    return bonuses.stream()
+        .sorted()
+        .map(SkillBonus::getTooltip)
+        .map(Component.class::cast)
+        .toList();
   }
 
   private static void addToMergeList(SkillBonus<?> b, List<SkillBonus<?>> bonuses) {
@@ -335,8 +339,7 @@ public class SkillTreeScreen extends Screen {
     if (skill == null) return;
     float buttonX = getSkillButtonX(skill);
     float buttonY = getSkillButtonY(skill);
-    SkillButton button =
-        new SkillButton(this::getAnimation, buttonX, buttonY, skill);
+    SkillButton button = new SkillButton(this::getAnimation, buttonX, buttonY, skill);
     addRenderableWidget(button);
     skillButtons.put(skillId, button);
     if (skill.isStartingPoint()) startingPoints.add(button);
@@ -513,7 +516,7 @@ public class SkillTreeScreen extends Screen {
 
   @Override
   public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-    if (getWidgetAt(mouseX, mouseY).filter(SkillBonusList.class::isInstance).isEmpty()) {
+    if (getWidgetAt(mouseX, mouseY).filter(ScrollableComponentList.class::isInstance).isEmpty()) {
       if (amount > 0 && zoom < 2F) zoom += 0.05f;
       if (amount < 0 && zoom > 0.25F) zoom -= 0.05f;
       rebuildWidgets();

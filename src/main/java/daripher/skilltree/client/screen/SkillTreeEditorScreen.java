@@ -232,13 +232,29 @@ public class SkillTreeEditorScreen extends Screen {
         .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
   }
 
-  private Stream<EditBox> textFields() {
-    return children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast);
+  private List<AbstractWidget> textFields() {
+    List<AbstractWidget> list = new ArrayList<>();
+    for (GuiEventListener widget : children()) {
+      if (isTextField(widget)) {
+        list.add((AbstractWidget) widget);
+      }
+    }
+    return list;
   }
 
   @SuppressWarnings("rawtypes")
-  private Stream<DropDownList> dropDownLists() {
-    return children().stream().filter(DropDownList.class::isInstance).map(DropDownList.class::cast);
+  private List<DropDownList> dropDownLists() {
+    List<DropDownList> list = new ArrayList<>();
+    for (GuiEventListener widget : children()) {
+      if (widget instanceof DropDownList) {
+        list.add((DropDownList) widget);
+      }
+    }
+    return list;
+  }
+
+  private boolean isTextField(GuiEventListener widget) {
+    return widget instanceof EditBox || widget instanceof MultiLineEditBox;
   }
 
   @Override
@@ -273,7 +289,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private boolean keyPressedOnTextField(int keyCode, int scanCode, int modifiers) {
-    return textFields().toList().stream().anyMatch(b -> b.keyPressed(keyCode, scanCode, modifiers));
+    return textFields().stream().anyMatch(b -> b.keyPressed(keyCode, scanCode, modifiers));
   }
 
   @Override
@@ -299,18 +315,18 @@ public class SkillTreeEditorScreen extends Screen {
 
   @Override
   public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-    textFields().toList().forEach(b -> b.keyReleased(keyCode, scanCode, modifiers));
+    textFields().forEach(b -> b.keyReleased(keyCode, scanCode, modifiers));
     return super.keyPressed(keyCode, scanCode, modifiers);
   }
 
   @Override
   public boolean charTyped(char character, int keyCode) {
-    for (EditBox textField : textFields().toList()) {
+    for (AbstractWidget textField : textFields()) {
       if (textField.charTyped(character, keyCode)) {
         return true;
       }
     }
-    for (DropDownList<?> dropDownList : dropDownLists().toList()) {
+    for (DropDownList<?> dropDownList : dropDownLists()) {
       if (dropDownList.charTyped(character, keyCode)) {
         return true;
       }
@@ -871,7 +887,16 @@ public class SkillTreeEditorScreen extends Screen {
 
   @Override
   public void tick() {
-    textFields().forEach(EditBox::tick);
+    textFields()
+        .forEach(
+            widget -> {
+              if (widget instanceof EditBox editBox) {
+                editBox.tick();
+              }
+              if (widget instanceof MultiLineEditBox multiLineEditBox) {
+                multiLineEditBox.tick();
+              }
+            });
     dropDownLists().forEach(DropDownList::tick);
   }
 
@@ -942,16 +967,22 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   public TextField addTextField(int x, int y, int width, int height, String defaultValue) {
-    assert minecraft != null;
+    Objects.requireNonNull(minecraft);
     return addRenderableWidget(
         new TextField(minecraft.font, toolsX + x, toolsY + y, width, height, defaultValue));
   }
 
   public NumericTextField addNumericTextField(
       int x, int y, int width, int height, double defaultValue) {
-    assert minecraft != null;
+    Objects.requireNonNull(minecraft);
     return addRenderableWidget(
         new NumericTextField(minecraft.font, toolsX + x, toolsY + y, width, height, defaultValue));
+  }
+
+  public TextArea addTextArea(int x, int y, int width, int height, String defaultValue) {
+    Objects.requireNonNull(minecraft);
+    return addRenderableWidget(
+        new TextArea(minecraft.font, toolsX + x, toolsY + y, width, height, defaultValue));
   }
 
   public void rebuildWidgets() {
