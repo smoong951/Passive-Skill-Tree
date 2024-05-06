@@ -29,7 +29,7 @@ public class SkillTreeClientData {
 
   public static int getSkillPointCost(int level) {
     if (use_skill_cost_array) {
-      if (level > skill_points_costs.length) {
+      if (level >= skill_points_costs.length) {
         return skill_points_costs[skill_points_costs.length - 1];
       }
       return skill_points_costs[level];

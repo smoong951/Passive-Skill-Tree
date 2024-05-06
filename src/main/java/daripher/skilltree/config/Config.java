@@ -170,14 +170,12 @@ public class Config {
   }
 
   public static int getSkillPointCost(int level) {
-    if (USE_POINTS_COSTS_ARRAY.get()) {
-      List<? extends Integer> costs = SKILL_POINTS_COSTS.get();
-      if (level > costs.size()) {
-        return costs.get(costs.size() - 1);
+    if (use_skill_points_array) {
+      if (level >= skill_points_costs.size()) {
+        return skill_points_costs.get(skill_points_costs.size() - 1);
       }
-      return costs.get(level);
+      return skill_points_costs.get(level);
     }
-    return FIRST_SKILL_COST.get()
-        + (LAST_SKILL_COST.get() - FIRST_SKILL_COST.get()) * level / max_skill_points;
+    return first_skill_cost + (last_skill_cost - first_skill_cost) * level / max_skill_points;
   }
 }
