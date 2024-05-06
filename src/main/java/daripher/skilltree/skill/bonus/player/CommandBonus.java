@@ -2,6 +2,7 @@ package daripher.skilltree.skill.bonus.player;
 
 import com.google.gson.*;
 import daripher.skilltree.client.screen.SkillTreeEditorScreen;
+import daripher.skilltree.client.tooltip.TooltipHelper;
 import daripher.skilltree.init.PSTSkillBonuses;
 import daripher.skilltree.skill.bonus.SkillBonus;
 import java.util.function.Consumer;
@@ -12,16 +13,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandBonus implements SkillBonus<CommandBonus> {
   private @Nonnull String command;
   private @Nonnull String removeCommand;
+  private @Nonnull String description;
 
-  public CommandBonus(@Nonnull String command, @Nonnull String removeCommand) {
+  public CommandBonus(
+      @Nonnull String command, @Nonnull String removeCommand, @NotNull String description) {
     this.command = command;
     this.removeCommand = removeCommand;
+    this.description = description;
   }
 
   @Override
@@ -52,7 +58,7 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
 
   @Override
   public CommandBonus copy() {
-    return new CommandBonus(command, removeCommand);
+    return new CommandBonus(command, removeCommand, description);
   }
 
   @Override
@@ -78,7 +84,8 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
 
   @Override
   public MutableComponent getTooltip() {
-    return Component.empty();
+    Style style = TooltipHelper.getSkillBonusStyle(isPositive());
+    return Component.translatable(description).withStyle(style);
   }
 
   @Override
@@ -92,23 +99,33 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
     editor.addLabel(0, 0, "Command", ChatFormatting.GOLD);
     editor.shiftWidgets(0, 19);
     editor
-        .addTextArea(0, 0, 200, 140, command)
+        .addTextArea(0, 0, 200, 70, command)
         .setResponder(
-            c -> {
-              setCommand(c);
+            v -> {
+              setCommand(v);
               consumer.accept(this.copy());
             });
-    editor.shiftWidgets(0, 145);
+    editor.shiftWidgets(0, 75);
     editor.addLabel(0, 0, "Remove Command", ChatFormatting.GOLD);
     editor.shiftWidgets(0, 19);
     editor
-        .addTextArea(0, 0, 200, 140, removeCommand)
+        .addTextArea(0, 0, 200, 70, removeCommand)
         .setResponder(
-            c -> {
-              setRemoveCommand(c);
+            v -> {
+              setRemoveCommand(v);
               consumer.accept(this.copy());
             });
-    editor.shiftWidgets(0, 145);
+    editor.shiftWidgets(0, 75);
+    editor.addLabel(0, 0, "Description", ChatFormatting.GOLD);
+    editor.shiftWidgets(0, 19);
+    editor
+        .addTextArea(0, 0, 200, 70, description)
+        .setResponder(
+            v -> {
+              setDescription(v);
+              consumer.accept(this.copy());
+            });
+    editor.shiftWidgets(0, 75);
   }
 
   public void setCommand(@Nonnull String command) {
@@ -119,13 +136,18 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
     this.removeCommand = removeCommand;
   }
 
+  public void setDescription(@Nonnull String description) {
+    this.description = description;
+  }
+
   public static class Serializer implements SkillBonus.Serializer {
     @Override
     public CommandBonus deserialize(JsonObject json) throws JsonParseException {
       String command = json.get("command").getAsString();
       String removeCommand =
           json.has("remove_command") ? json.get("remove_command").getAsString() : "";
-      return new CommandBonus(command, removeCommand);
+      String description = json.has("description") ? json.get("description").getAsString() : "";
+      return new CommandBonus(command, removeCommand, description);
     }
 
     @Override
@@ -135,13 +157,15 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
       }
       json.addProperty("command", aBonus.command);
       json.addProperty("remove_command", aBonus.removeCommand);
+      json.addProperty("description", aBonus.description);
     }
 
     @Override
     public CommandBonus deserialize(CompoundTag tag) {
       String command = tag.getString("command");
       String removeCommand = tag.contains("remove_command") ? tag.getString("remove_command") : "";
-      return new CommandBonus(command, removeCommand);
+      String description = tag.contains("description") ? tag.getString("description") : "";
+      return new CommandBonus(command, removeCommand, description);
     }
 
     @Override
@@ -152,6 +176,7 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
       CompoundTag tag = new CompoundTag();
       tag.putString("command", aBonus.command);
       tag.putString("remove_command", aBonus.removeCommand);
+      tag.putString("description", aBonus.description);
       return tag;
     }
 
@@ -159,7 +184,8 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
     public CommandBonus deserialize(FriendlyByteBuf buf) {
       String command = buf.readUtf();
       String removeCommand = buf.readUtf();
-      return new CommandBonus(command, removeCommand);
+      String description = buf.readUtf();
+      return new CommandBonus(command, removeCommand, description);
     }
 
     @Override
@@ -169,11 +195,12 @@ public class CommandBonus implements SkillBonus<CommandBonus> {
       }
       buf.writeUtf(commandBonus.command);
       buf.writeUtf(commandBonus.removeCommand);
+      buf.writeUtf(commandBonus.description);
     }
 
     @Override
     public SkillBonus<?> createDefaultInstance() {
-      return new CommandBonus("give <p> minecraft:apple", "");
+      return new CommandBonus("give <p> minecraft:apple", "", "Grants an apple when learned");
     }
   }
 }
