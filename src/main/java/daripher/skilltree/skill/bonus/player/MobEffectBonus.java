@@ -101,6 +101,11 @@ public final class MobEffectBonus implements EventListenerBonus<MobEffectBonus> 
   }
 
   @Override
+  public void gatherInfo(Consumer<MutableComponent> consumer) {
+    TooltipHelper.consumeTranslated(effect.getDescriptionId() + ".info", consumer);
+  }
+
+  @Override
   public boolean isPositive() {
     return chance > 0
         ^ eventListener.getTarget() == Target.PLAYER
@@ -114,7 +119,9 @@ public final class MobEffectBonus implements EventListenerBonus<MobEffectBonus> 
 
   @Override
   public void addEditorWidgets(
-      SkillTreeEditorScreen editor, int row, Consumer<EventListenerBonus<MobEffectBonus>> consumer) {
+      SkillTreeEditorScreen editor,
+      int row,
+      Consumer<EventListenerBonus<MobEffectBonus>> consumer) {
     editor.addLabel(0, 0, "Effect", ChatFormatting.GOLD);
     editor.addLabel(150, 0, "Chance", ChatFormatting.GOLD);
     editor.shiftWidgets(0, 19);
