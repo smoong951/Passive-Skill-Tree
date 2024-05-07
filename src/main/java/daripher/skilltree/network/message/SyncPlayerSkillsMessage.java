@@ -7,6 +7,7 @@ import daripher.skilltree.data.reloader.SkillsReloader;
 import daripher.skilltree.skill.PassiveSkill;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -56,6 +57,7 @@ public class SyncPlayerSkillsMessage {
     capability.getPlayerSkills().clear();
     message.learnedSkills.stream()
         .map(SkillsReloader::getSkillById)
+        .filter(Objects::nonNull)
         .forEach(capability.getPlayerSkills()::add);
     capability.setSkillPoints(message.skillPoints);
     if (minecraft.screen instanceof SkillTreeScreen screen) {
