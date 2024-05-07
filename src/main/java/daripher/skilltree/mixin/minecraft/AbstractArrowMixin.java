@@ -20,9 +20,9 @@ public abstract class AbstractArrowMixin {
   private void pickupAsItem(Player player, CallbackInfo callback) {
     @SuppressWarnings("DataFlowIssue")
     AbstractArrow arrow = (AbstractArrow) (Object) this;
+    if (arrow.level.isClientSide) return;
     ItemStack pickupItem = getPickupItem();
     if (pickupItem == null || !pickupItem.is(ItemTags.ARROWS)) return;
-    if (arrow.level.isClientSide) return;
     if (arrow.shakeTime > 0) return;
     if (!inGround && !arrow.isNoPhysics()) return;
     if (arrow.pickup != Pickup.ALLOWED) return;
