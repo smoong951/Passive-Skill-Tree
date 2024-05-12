@@ -6,17 +6,17 @@ import daripher.skilltree.init.PSTDamageConditions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.damagesource.DamageTypes;
 
-public record ProjectileDamageCondition() implements DamageCondition {
+public record MagicDamageCondition() implements DamageCondition {
   @Override
   public boolean met(DamageSource source) {
-    return source.getDirectEntity() instanceof Projectile;
+    return source.is(DamageTypes.MAGIC);
   }
 
   @Override
   public DamageCondition.Serializer getSerializer() {
-    return PSTDamageConditions.PROJECTILE.get();
+    return PSTDamageConditions.MAGIC.get();
   }
 
   @Override
@@ -33,24 +33,24 @@ public record ProjectileDamageCondition() implements DamageCondition {
   public static class Serializer implements DamageCondition.Serializer {
     @Override
     public DamageCondition deserialize(JsonObject json) throws JsonParseException {
-      return new ProjectileDamageCondition();
+      return new MagicDamageCondition();
     }
 
     @Override
     public void serialize(JsonObject json, DamageCondition condition) {
-      if (!(condition instanceof ProjectileDamageCondition)) {
+      if (!(condition instanceof MagicDamageCondition)) {
         throw new IllegalArgumentException();
       }
     }
 
     @Override
     public DamageCondition deserialize(CompoundTag tag) {
-      return new ProjectileDamageCondition();
+      return new MagicDamageCondition();
     }
 
     @Override
     public CompoundTag serialize(DamageCondition condition) {
-      if (!(condition instanceof ProjectileDamageCondition)) {
+      if (!(condition instanceof MagicDamageCondition)) {
         throw new IllegalArgumentException();
       }
       return new CompoundTag();
@@ -58,19 +58,19 @@ public record ProjectileDamageCondition() implements DamageCondition {
 
     @Override
     public DamageCondition deserialize(FriendlyByteBuf buf) {
-      return new ProjectileDamageCondition();
+      return new MagicDamageCondition();
     }
 
     @Override
     public void serialize(FriendlyByteBuf buf, DamageCondition condition) {
-      if (!(condition instanceof ProjectileDamageCondition)) {
+      if (!(condition instanceof MagicDamageCondition)) {
         throw new IllegalArgumentException();
       }
     }
 
     @Override
     public DamageCondition createDefaultInstance() {
-      return new ProjectileDamageCondition();
+      return new MagicDamageCondition();
     }
   }
 }

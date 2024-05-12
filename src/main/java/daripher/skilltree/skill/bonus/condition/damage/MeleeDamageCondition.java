@@ -16,7 +16,7 @@ public record MeleeDamageCondition() implements DamageCondition {
 
   @Override
   public DamageCondition.Serializer getSerializer() {
-    return PSTDamageConditions.IS_MELEE.get();
+    return PSTDamageConditions.MELEE.get();
   }
 
   @Override

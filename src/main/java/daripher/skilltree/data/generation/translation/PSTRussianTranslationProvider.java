@@ -387,8 +387,8 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add(PSTEventListeners.ITEM_USED.get(), "%s когда вы используете %s");
     add(PSTEventListeners.DAMAGE_TAKEN.get(), "%s когда вы получаете %s");
     // damage conditions
-    add(PSTDamageConditions.IS_PROJECTILE.get(), "Урон снарядами");
-    add(PSTDamageConditions.IS_MELEE.get(), "Урон в ближнем бою");
+    add(PSTDamageConditions.PROJECTILE.get(), "Урон снарядами");
+    add(PSTDamageConditions.MELEE.get(), "Урон в ближнем бою");
     add(PSTDamageConditions.NONE.get(), "Урон");
     // enchantment conditions
     add(PSTEnchantmentConditions.WEAPON.get(), "Зачарование оружия");

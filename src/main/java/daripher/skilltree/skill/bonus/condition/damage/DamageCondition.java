@@ -6,12 +6,14 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 
+import java.util.Objects;
+
 public interface DamageCondition {
   boolean met(DamageSource source);
 
   default String getDescriptionId() {
     ResourceLocation id = PSTRegistries.DAMAGE_CONDITIONS.get().getKey(getSerializer());
-    assert id != null;
+    Objects.requireNonNull(id);
     return "damage_condition.%s.%s".formatted(id.getNamespace(), id.getPath());
   }
 

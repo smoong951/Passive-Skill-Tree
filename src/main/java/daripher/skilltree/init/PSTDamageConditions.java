@@ -2,10 +2,8 @@ package daripher.skilltree.init;
 
 import daripher.skilltree.SkillTreeMod;
 import daripher.skilltree.client.tooltip.TooltipHelper;
-import daripher.skilltree.skill.bonus.condition.damage.DamageCondition;
-import daripher.skilltree.skill.bonus.condition.damage.MeleeDamageCondition;
-import daripher.skilltree.skill.bonus.condition.damage.NoneDamageCondition;
-import daripher.skilltree.skill.bonus.condition.damage.ProjectileDamageCondition;
+import daripher.skilltree.skill.bonus.condition.damage.*;
+
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.resources.ResourceLocation;
@@ -20,10 +18,12 @@ public class PSTDamageConditions {
 
   public static final RegistryObject<DamageCondition.Serializer> NONE =
       REGISTRY.register("none", NoneDamageCondition.Serializer::new);
-  public static final RegistryObject<DamageCondition.Serializer> IS_PROJECTILE =
+  public static final RegistryObject<DamageCondition.Serializer> PROJECTILE =
       REGISTRY.register("projectile", ProjectileDamageCondition.Serializer::new);
-  public static final RegistryObject<DamageCondition.Serializer> IS_MELEE =
+  public static final RegistryObject<DamageCondition.Serializer> MELEE =
       REGISTRY.register("melee", MeleeDamageCondition.Serializer::new);
+  public static final RegistryObject<DamageCondition.Serializer> MAGIC =
+      REGISTRY.register("magic", MagicDamageCondition.Serializer::new);
 
   public static List<DamageCondition> conditionsList() {
     return PSTRegistries.DAMAGE_CONDITIONS.get().getValues().stream()
