@@ -25,6 +25,8 @@ public class PSTEventListeners {
       REGISTRY.register("item_used", ItemUsedEventListener.Serializer::new);
   public static final RegistryObject<SkillEventListener.Serializer> DAMAGE_TAKEN =
       REGISTRY.register("damage_taken", DamageTakenEventListener.Serializer::new);
+  public static final RegistryObject<SkillEventListener.Serializer> ON_KILL =
+      REGISTRY.register("on_kill", KillEventListener.Serializer::new);
 
   public static List<SkillEventListener> eventsList() {
     return PSTRegistries.EVENT_LISTENERS.get().getValues().stream()

@@ -6,12 +6,11 @@ import daripher.skilltree.init.PSTDamageConditions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 
 public record MagicDamageCondition() implements DamageCondition {
   @Override
   public boolean met(DamageSource source) {
-    return source.is(DamageTypes.MAGIC);
+    return source.isMagic();
   }
 
   @Override

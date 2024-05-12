@@ -384,9 +384,12 @@ public class PSTEnglishTranslationProvider extends PSTTranslationProvider {
     add(PSTEventListeners.EVASION.get(), "%s when you evade an attack");
     add(PSTEventListeners.ITEM_USED.get(), "%s when you use %s");
     add(PSTEventListeners.DAMAGE_TAKEN.get(), "%s when you take %s");
+    add(PSTEventListeners.ON_KILL.get(), "%s on kill");
+    add(PSTEventListeners.ON_KILL.get(), "damage", "%s on kill with %s");
     // damage conditions
     add(PSTDamageConditions.PROJECTILE.get(), "Projectile Damage");
     add(PSTDamageConditions.MELEE.get(), "Melee Damage");
+    add(PSTDamageConditions.MAGIC.get(), "Magic Damage");
     add(PSTDamageConditions.NONE.get(), "Damage");
     // enchantment conditions
     add(PSTEnchantmentConditions.WEAPON.get(), "Weapon Enchantments");

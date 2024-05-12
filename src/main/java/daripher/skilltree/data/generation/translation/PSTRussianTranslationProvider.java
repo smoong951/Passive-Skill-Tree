@@ -386,9 +386,12 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add(PSTEventListeners.EVASION.get(), "%s когда вы уклоняетесь от атаки");
     add(PSTEventListeners.ITEM_USED.get(), "%s когда вы используете %s");
     add(PSTEventListeners.DAMAGE_TAKEN.get(), "%s когда вы получаете %s");
+    add(PSTEventListeners.ON_KILL.get(), "%s при убийстве");
+    add(PSTEventListeners.ON_KILL.get(), "damage", "%s при убийстве через %s");
     // damage conditions
     add(PSTDamageConditions.PROJECTILE.get(), "Урон снарядами");
     add(PSTDamageConditions.MELEE.get(), "Урон в ближнем бою");
+    add(PSTDamageConditions.MAGIC.get(), "Урон магией");
     add(PSTDamageConditions.NONE.get(), "Урон");
     // enchantment conditions
     add(PSTEnchantmentConditions.WEAPON.get(), "Зачарование оружия");

@@ -12,10 +12,7 @@ import daripher.skilltree.item.ItemHelper;
 import daripher.skilltree.mixin.AbstractArrowAccessor;
 import daripher.skilltree.potion.PotionHelper;
 import daripher.skilltree.skill.PassiveSkill;
-import daripher.skilltree.skill.bonus.event.AttackEventListener;
-import daripher.skilltree.skill.bonus.event.BlockEventListener;
-import daripher.skilltree.skill.bonus.event.DamageTakenEventListener;
-import daripher.skilltree.skill.bonus.event.ItemUsedEventListener;
+import daripher.skilltree.skill.bonus.event.*;
 import daripher.skilltree.skill.bonus.item.FoodHealingBonus;
 import daripher.skilltree.skill.bonus.item.ItemBonus;
 import daripher.skilltree.skill.bonus.item.ItemSkillBonus;
@@ -403,6 +400,17 @@ public class SkillBonusHandler {
       if (!(bonus.getEventListener() instanceof ItemUsedEventListener listener)) continue;
       SkillBonus<? extends EventListenerBonus<?>> copy = bonus.copy();
       listener.onEvent(player, event.getItem(), (EventListenerBonus<?>) copy);
+    }
+  }
+
+  @SubscribeEvent
+  public static void applyEventListenerEffect(LivingDeathEvent event) {
+    if (!(event.getSource().getEntity() instanceof Player player)) return;
+    for (EventListenerBonus<?> bonus : getSkillBonuses(player, EventListenerBonus.class, true)) {
+      if (!(bonus.getEventListener() instanceof KillEventListener listener)) continue;
+      SkillBonus<? extends EventListenerBonus<?>> copy = bonus.copy();
+      DamageSource source = event.getSource();
+      listener.onEvent(player, player, source, (EventListenerBonus<?>) copy);
     }
   }
 
