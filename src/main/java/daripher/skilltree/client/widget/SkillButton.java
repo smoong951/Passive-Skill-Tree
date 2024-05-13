@@ -31,7 +31,6 @@ public class SkillButton extends Button {
   private static final Style GATEWAY_TITLE_STYLE = Style.EMPTY.withColor(0x849696);
   private static final Style DESCRIPTION_STYLE = Style.EMPTY.withColor(0x7B7BE5);
   private static final Style ID_STYLE = Style.EMPTY.withColor(0x545454);
-  private static final Style LORE_STYLE = Style.EMPTY.withColor(0xB96526).withItalic(true);
   private final Supplier<Float> animationFunction;
   public final PassiveSkill skill;
   public float x;
@@ -141,13 +140,19 @@ public class SkillButton extends Button {
     ArrayList<MutableComponent> tooltip = new ArrayList<>();
     addTitleTooltip(tooltip);
     addLimitationsTooltip(skillTree, tooltip);
+    List<MutableComponent> description = skill.getDescription();
+    if (description != null) {
+      tooltip.addAll(description);
+    } else {
+      addSkillBonusTooltip(tooltip);
+    }
+    addAdvancedTooltip(tooltip);
+    return tooltip;
+  }
+
+  public void addSkillBonusTooltip(List<MutableComponent> tooltip) {
     addDescriptionTooltip(tooltip);
     addInfoTooltip(tooltip);
-    addLoreTooltip(tooltip);
-    Minecraft minecraft = Minecraft.getInstance();
-    boolean useAdvancedTooltip = minecraft.options.advancedItemTooltips;
-    if (useAdvancedTooltip) addAdvancedTooltip(tooltip);
-    return tooltip;
   }
 
   private void addInfoTooltip(List<MutableComponent> tooltip) {
@@ -166,12 +171,9 @@ public class SkillButton extends Button {
   }
 
   protected void addAdvancedTooltip(List<MutableComponent> tooltip) {
+    Minecraft minecraft = Minecraft.getInstance();
+    if (!minecraft.options.advancedItemTooltips) return;
     addIdTooltip(tooltip);
-    String descriptionId = getSkillId() + ".description";
-    String description = Component.translatable(descriptionId).getString();
-    if (!description.equals(descriptionId)) {
-      skill.getBonuses().stream().map(SkillBonus::getAdvancedTooltip).forEach(tooltip::add);
-    }
   }
 
   protected void addDescriptionTooltip(List<MutableComponent> tooltip) {
@@ -185,13 +187,6 @@ public class SkillButton extends Button {
           .map(this::applyDescriptionStyle)
           .forEach(tooltip::add);
     }
-  }
-
-  private void addLoreTooltip(List<MutableComponent> tooltip) {
-    String loreId = getSkillId() + ".lore";
-    MutableComponent loreComponent = Component.translatable(loreId);
-    if (loreId.equals(loreComponent.getString())) return;
-    tooltip.add(loreComponent.withStyle(LORE_STYLE));
   }
 
   private void addLimitationsTooltip(

@@ -12,6 +12,11 @@ public class TextArea extends MultiLineEditBox {
     setValue(defaultValue);
   }
 
+  @Override
+  public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    return isFocused() && super.keyPressed(keyCode, scanCode, modifiers);
+  }
+
   public TextArea setResponder(@NotNull Consumer<String> responder) {
     super.setValueListener(responder);
     return this;

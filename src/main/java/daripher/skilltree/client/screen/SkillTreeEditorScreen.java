@@ -24,6 +24,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -55,10 +57,10 @@ public class SkillTreeEditorScreen extends Screen {
   private int prevMouseX;
   private int prevMouseY;
   private float zoom = 1F;
-  private int selectedBonus = -1;
+  private int selectedSubMenu = -1;
   private int dragX;
   private int dragY;
-  private boolean selecting;
+  private boolean selectingArea;
 
   public SkillTreeEditorScreen(ResourceLocation skillTreeId) {
     super(Component.empty());
@@ -143,7 +145,7 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void renderSkillSelection(PoseStack poseStack, int mouseX, int mouseY) {
-    if (!selecting) return;
+    if (!selectingArea) return;
     ScreenHelper.drawRectangle(poseStack, dragX, dragY, mouseX - dragX, mouseY - dragY, 0xEE95EB34);
   }
 
@@ -158,7 +160,7 @@ public class SkillTreeEditorScreen extends Screen {
       return true;
     }
     if (hasShiftDown() && button == 0) {
-      selecting = true;
+      selectingArea = true;
       dragX = (int) mouseX;
       dragY = (int) mouseY;
     }
@@ -167,9 +169,9 @@ public class SkillTreeEditorScreen extends Screen {
 
   @Override
   public boolean mouseReleased(double mouseX, double mouseY, int button) {
-    if (selecting) {
+    if (selectingArea) {
       addSelectedSkillsToSelection(mouseX, mouseY);
-      selecting = false;
+      selectingArea = false;
     }
     return super.mouseReleased(mouseX, mouseY, button);
   }
@@ -260,8 +262,8 @@ public class SkillTreeEditorScreen extends Screen {
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
     if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-      if (selectedBonus != -1) {
-        selectEditedBonus(-1);
+      if (selectedSubMenu != -1) {
+        selectSubMenu(-1);
         closeOnEsc = false;
         return true;
       }
@@ -383,6 +385,7 @@ public class SkillTreeEditorScreen extends Screen {
       case BONUSES -> addBonusesTools();
       case NODE -> addNodeToolsButtons();
       case TAGS -> addTagsToolsButtons();
+      case DESCRIPTION -> addDescriptionsToolsButtons();
       case CONNECTIONS -> addConnectionToolsButton();
     }
     toolsY += 5;
@@ -390,15 +393,15 @@ public class SkillTreeEditorScreen extends Screen {
 
   private void addBonusesTools() {
     Button backButton = addButton(0, 0, 90, 14, "Back");
-    if (selectedBonus == -1) {
+    if (selectedSubMenu == -1) {
       backButton.setPressFunc(b -> selectTools(Tools.MAIN));
     } else {
-      backButton.setPressFunc(b -> selectEditedBonus(-1));
+      backButton.setPressFunc(b -> selectSubMenu(-1));
       addConfirmationButton(110, 0, 90, 14, "Remove", "Confirm")
           .setPressFunc(
               b -> {
-                selectedSkills().forEach(s -> removeSkillBonus(s, selectedBonus));
-                selectEditedBonus(-1);
+                selectedSkills().forEach(s -> removeSkillBonus(s, selectedSubMenu));
+                selectSubMenu(-1);
                 saveSelectedSkills();
                 rebuildWidgets();
               });
@@ -407,36 +410,31 @@ public class SkillTreeEditorScreen extends Screen {
     PassiveSkill skill = getFirstSelectedSkill();
     if (selectedSkills().anyMatch(otherSkill -> !sameBonuses(skill, otherSkill))) return;
     List<SkillBonus<?>> bonuses = skill.getBonuses();
-    if (selectedBonus >= bonuses.size()) {
-      selectedBonus = -1;
+    if (selectedSubMenu >= bonuses.size()) {
+      selectedSubMenu = -1;
     }
-    if (selectedBonus == -1) {
+    if (selectedSubMenu == -1) {
       for (int i = 0; i < bonuses.size(); i++) {
+        final int index = i;
         SkillBonus<?> bonus = bonuses.get(i);
         String message = bonus.getTooltip().getString();
-        if (font.width(message) > 190) {
-          while (font.width(message + "...") > 190) {
-            message = message.substring(0, message.length() - 1);
-          }
-          message += "...";
-        }
-        final int index = i;
-        addButton(0, 0, 200, 14, message).setPressFunc(b -> selectEditedBonus(index));
+        message = TooltipHelper.getTrimmedMessage(font, message, 190);
+        addButton(0, 0, 200, 14, message).setPressFunc(b -> selectSubMenu(index));
         shiftWidgets(0, 19);
       }
     } else {
       skill
           .getBonuses()
-          .get(selectedBonus)
+          .get(selectedSubMenu)
           .addEditorWidgets(
               this,
-              selectedBonus,
+              selectedSubMenu,
               b -> {
-                selectedSkills().forEach(s -> s.getBonuses().set(selectedBonus, b.copy()));
+                selectedSkills().forEach(s -> s.getBonuses().set(selectedSubMenu, b.copy()));
                 saveSelectedSkills();
               });
     }
-    if (selectedBonus == -1) {
+    if (selectedSubMenu == -1) {
       shiftWidgets(0, 10);
       addLabel(0, 0, "Add Bonus", ChatFormatting.GOLD);
       shiftWidgets(0, 19);
@@ -458,8 +456,8 @@ public class SkillTreeEditorScreen extends Screen {
     }
   }
 
-  private void selectEditedBonus(int index) {
-    selectedBonus = index;
+  private void selectSubMenu(int index) {
+    selectedSubMenu = index;
     rebuildWidgets();
   }
 
@@ -470,12 +468,12 @@ public class SkillTreeEditorScreen extends Screen {
     shiftWidgets(0, 19);
     addButton(0, 0, 200, 14, "Button").setPressFunc(b -> selectTools(Tools.BUTTON));
     shiftWidgets(0, 19);
-    if (!selectedSkills.isEmpty()) {
-      addButton(0, 0, 200, 14, "New Skill").setPressFunc(b -> selectTools(Tools.NODE));
-      shiftWidgets(0, 19);
-      addButton(0, 0, 200, 14, "Tags").setPressFunc(b -> selectTools(Tools.TAGS));
-      shiftWidgets(0, 19);
-    }
+    addButton(0, 0, 200, 14, "New Skill").setPressFunc(b -> selectTools(Tools.NODE));
+    shiftWidgets(0, 19);
+    addButton(0, 0, 200, 14, "Tags").setPressFunc(b -> selectTools(Tools.TAGS));
+    shiftWidgets(0, 19);
+    addButton(0, 0, 200, 14, "Description").setPressFunc(b -> selectTools(Tools.DESCRIPTION));
+    shiftWidgets(0, 19);
     if (selectedSkills.size() >= 2) {
       addButton(0, 0, 200, 14, "Connections").setPressFunc(b -> selectTools(Tools.CONNECTIONS));
       shiftWidgets(0, 19);
@@ -496,14 +494,14 @@ public class SkillTreeEditorScreen extends Screen {
     if (selectedSkills.isEmpty()) return;
     addLabel(0, 0, "Distance", ChatFormatting.GOLD);
     addLabel(65, 0, "Angle", ChatFormatting.GOLD);
-    toolsY += 19;
+    shiftWidgets(0, 19);
     NumericTextField distanceEditor = addNumericTextField(0, 0, 60, 14, 10);
     NumericTextField angleEditor = addNumericTextField(65, 0, 60, 14, 0);
-    toolsY += 19;
+    shiftWidgets(0, 19);
     addButton(0, 0, 60, 14, "Add").setPressFunc(b -> createNewSkills(angleEditor, distanceEditor));
     addButton(65, 0, 60, 14, "Copy")
         .setPressFunc(b -> createSelectedSkillsCopies(angleEditor, distanceEditor));
-    toolsY += 19;
+    shiftWidgets(0, 19);
   }
 
   private void addTagsToolsButtons() {
@@ -514,7 +512,7 @@ public class SkillTreeEditorScreen extends Screen {
     if (selectedSkills().anyMatch(otherSkill -> !sameTags(skill, otherSkill))) return;
     addLabel(0, 0, "Tag", ChatFormatting.GOLD);
     addLabel(110, 0, "Limit", ChatFormatting.GOLD);
-    toolsY += 19;
+    shiftWidgets(0, 19);
     List<String> tags = getFirstSelectedSkill().getTags();
     for (int i = 0; i < tags.size(); i++) {
       int index = i;
@@ -537,7 +535,7 @@ public class SkillTreeEditorScreen extends Screen {
                 }
                 SkillTreeClientData.saveEditorSkillTree(skillTree);
               });
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     toolsY += 10;
     addButton(0, 0, 90, 14, "Add")
@@ -556,7 +554,103 @@ public class SkillTreeEditorScreen extends Screen {
                 rebuildWidgets();
               });
     }
-    toolsY += 19;
+    shiftWidgets(0, 19);
+  }
+
+  private void addDescriptionsToolsButtons() {
+    Button backButton = addButton(0, 0, 90, 14, "Back");
+    if (selectedSkills.isEmpty()) return;
+    PassiveSkill skill = getFirstSelectedSkill();
+    if (selectedSkills().anyMatch(otherSkill -> !sameDescription(skill, otherSkill))) return;
+    List<MutableComponent> description = skill.getDescription();
+    if (selectedSubMenu == -1) {
+      backButton.setPressFunc(b -> selectTools(Tools.MAIN));
+      addConfirmationButton(110, 0, 90, 14, "Regenerate", "Confirm")
+          .setPressFunc(b -> regenerateSelectedSkillsDescription());
+      shiftWidgets(0, 29);
+      if (description != null) {
+        for (int i = 0; i < description.size(); i++) {
+          int index = i;
+          String message = description.get(i).getString();
+          message = TooltipHelper.getTrimmedMessage(font, message, 190);
+          addButton(0, 0, 200, 14, message).setPressFunc(b -> selectSubMenu(index));
+          shiftWidgets(0, 19);
+        }
+      }
+      shiftWidgets(0, 10);
+      addButton(0, 0, 90, 14, "Add").setPressFunc(b -> addSelectedSkillsDescriptionLine());
+      addConfirmationButton(110, 0, 90, 14, "Clear", "Confirm")
+          .setPressFunc(b -> removeSelectedSkillsDescription());
+      shiftWidgets(0, 19);
+    } else {
+      backButton.setPressFunc(b -> selectSubMenu(-1));
+      addConfirmationButton(110, 0, 90, 14, "Remove", "Confirm")
+          .setPressFunc(b -> removeSelectedSkillsDescriptionLine());
+      shiftWidgets(0, 29);
+      if (description == null) {
+        selectSubMenu(-1);
+        return;
+      }
+      MutableComponent component = description.get(selectedSubMenu);
+      addTextArea(0, 0, 200, 70, component.getString())
+          .setResponder(this::setSelectedSkillsDescription);
+      shiftWidgets(0, 75);
+      addLabel(0, 0, "Color", ChatFormatting.GOLD);
+      Style style = component.getStyle();
+      TextColor textColor = style.getColor();
+      if (textColor == null) {
+        textColor = TextColor.fromRgb(0xffffff);
+      }
+      String color = Integer.toHexString(textColor.getValue());
+      addTextField(120, 0, 80, 14, color)
+          .setSoftFilter(v -> v.matches("^#?[a-fA-F0-9]{6}"))
+          .setResponder(
+              v -> {
+                int rgb = Integer.parseInt(formatColor(v), 16);
+                setSelectedSkillsDescriptionStyle(s -> s.withColor(rgb));
+              });
+      shiftWidgets(0, 19);
+      addLabel(0, 0, "Bold", ChatFormatting.GOLD);
+      addCheckBox(186, 0, style.isBold())
+          .setResponder(
+              v -> {
+                setSelectedSkillsDescriptionStyle(s -> s.withBold(v));
+                rebuildWidgets();
+              });
+      shiftWidgets(0, 19);
+      addLabel(0, 0, "Italic", ChatFormatting.GOLD);
+      addCheckBox(186, 0, style.isItalic())
+          .setResponder(
+              v -> {
+                setSelectedSkillsDescriptionStyle(s -> s.withItalic(v));
+                rebuildWidgets();
+              });
+      shiftWidgets(0, 19);
+      addLabel(0, 0, "Underline", ChatFormatting.GOLD);
+      addCheckBox(186, 0, style.isUnderlined())
+          .setResponder(
+              v -> {
+                setSelectedSkillsDescriptionStyle(s -> s.withUnderlined(v));
+                rebuildWidgets();
+              });
+      shiftWidgets(0, 19);
+      addLabel(0, 0, "Strikethrough", ChatFormatting.GOLD);
+      addCheckBox(186, 0, style.isStrikethrough())
+          .setResponder(
+              v -> {
+                setSelectedSkillsDescriptionStyle(s -> s.withStrikethrough(v));
+                rebuildWidgets();
+              });
+      shiftWidgets(0, 19);
+      addLabel(0, 0, "Obfuscated", ChatFormatting.GOLD);
+      addCheckBox(186, 0, style.isObfuscated())
+          .setResponder(
+              v -> {
+                setSelectedSkillsDescriptionStyle(s -> s.withObfuscated(v));
+                rebuildWidgets();
+              });
+      shiftWidgets(0, 19);
+    }
   }
 
   private void createSelectedSkillsCopies(
@@ -588,20 +682,24 @@ public class SkillTreeEditorScreen extends Screen {
     rebuildWidgets();
   }
 
-  private void createCopiedSkill(float x, float y, PassiveSkill other) {
+  private void createCopiedSkill(float x, float y, PassiveSkill original) {
     PassiveSkill skill =
         new PassiveSkill(
             createNewSkillId(),
-            other.getButtonSize(),
-            other.getBackgroundTexture(),
-            other.getIconTexture(),
-            other.getBorderTexture(),
-            other.isStartingPoint());
+            original.getButtonSize(),
+            original.getBackgroundTexture(),
+            original.getIconTexture(),
+            original.getBorderTexture(),
+            original.isStartingPoint());
     skill.setPosition(x, y);
-    skill.setConnectedTree(other.getConnectedTreeId());
-    skill.setStartingPoint(other.isStartingPoint());
-    other.getBonuses().stream().map(SkillBonus::copy).forEach(skill::addSkillBonus);
-    skill.connect(other);
+    skill.setConnectedTree(original.getConnectedTreeId());
+    skill.setStartingPoint(original.isStartingPoint());
+    original.getBonuses().stream().map(SkillBonus::copy).forEach(skill::addSkillBonus);
+    original.getTags().forEach(skill.getTags()::add);
+    skill.setTitle(original.getTitle());
+    skill.setTitleColor(original.getTitleColor());
+    skill.setDescription(original.getDescription());
+    skill.connect(original);
     SkillTreeClientData.saveEditorSkill(skill);
     SkillTreeClientData.loadEditorSkill(skill.getId());
     skillTree.getSkillIds().add(skill.getId());
@@ -638,16 +736,16 @@ public class SkillTreeEditorScreen extends Screen {
     PassiveSkill firstSelectedSkill = getFirstSelectedSkill();
     if (canEdit(PassiveSkill::getButtonSize)) {
       addLabel(0, 0, "Size", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addNumericTextField(0, 0, 40, 14, firstSelectedSkill.getButtonSize())
           .setNumericFilter(d -> d >= 2)
           .setNumericResponder(this::setSelectedSkillsSize);
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     if (selectedSkills.size() == 1) {
       toolsY -= 38;
       addLabel(65, 0, "Position", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addNumericTextField(65, 0, 60, 14, firstSelectedSkill.getPositionX())
           .setNumericResponder(
               v ->
@@ -658,30 +756,30 @@ public class SkillTreeEditorScreen extends Screen {
               v ->
                   setSkillPosition(
                       getFirstSelectedSkill(), firstSelectedSkill.getPositionX(), v.floatValue()));
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     if (canEdit(PassiveSkill::getTitle)) {
       addLabel(0, 0, "Title", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addTextField(0, 0, 200, 14, firstSelectedSkill.getTitle())
           .setResponder(this::setSelectedSkillsTitle);
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     boolean canEditTitleColor = canEdit(PassiveSkill::getTitleColor);
     if (canEditTitleColor) {
       addLabel(0, 0, "Title Color", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addTextField(0, 0, 80, 14, firstSelectedSkill.getTitleColor())
           .setSoftFilter(v -> v.matches("^#?[a-fA-F0-9]{6}") || v.isEmpty())
           .setResponder(this::setSelectedSkillsTitleColor);
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     if (canEdit(PassiveSkill::isStartingPoint)) {
       if (canEditTitleColor) {
         shiftWidgets(100, -38);
       }
       addLabel(0, 0, "Starting Point", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addCheckBox(0, 0, firstSelectedSkill.isStartingPoint())
           .setResponder(
               v -> {
@@ -691,7 +789,7 @@ public class SkillTreeEditorScreen extends Screen {
       if (canEditTitleColor) {
         shiftWidgets(-100, 0);
       }
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
   }
 
@@ -735,10 +833,89 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void setSelectedSkillsTitleColor(String color) {
-    if (color.startsWith("#")) color = color.substring(1);
-    String finalColor = color;
+    String finalColor = formatColor(color);
     selectedSkills().forEach(skill -> skill.setTitleColor(finalColor));
     saveSelectedSkills();
+  }
+
+  @NotNull
+  private static String formatColor(String color) {
+    if (color.startsWith("#")) color = color.substring(1);
+    return color;
+  }
+
+  private void setSelectedSkillsDescription(String line) {
+    selectedSkills()
+        .forEach(
+            skill -> {
+              List<MutableComponent> description = skill.getDescription();
+              Objects.requireNonNull(description);
+              MutableComponent component = description.get(selectedSubMenu);
+              Style style = component.getStyle();
+              description.set(selectedSubMenu, Component.literal(line).withStyle(style));
+            });
+    saveSelectedSkills();
+  }
+
+  private void setSelectedSkillsDescriptionStyle(Function<Style, Style> styleFunc) {
+    selectedSkills()
+        .forEach(
+            skill -> {
+              List<MutableComponent> description = skill.getDescription();
+              Objects.requireNonNull(description);
+              MutableComponent component = description.get(selectedSubMenu);
+              Style style = styleFunc.apply(component.getStyle());
+              description.set(selectedSubMenu, component.withStyle(style));
+              SkillTreeClientData.saveEditorSkill(skill);
+              SkillTreeClientData.loadEditorSkill(skill.getId());
+            });
+  }
+
+  private void regenerateSelectedSkillsDescription() {
+    selectedSkills().forEach(skill -> skill.setDescription(null));
+    saveSelectedSkills();
+    selectedSkills()
+        .forEach(
+            skill -> {
+              List<MutableComponent> description = new ArrayList<>();
+              skillButtons.get(skill.getId()).addSkillBonusTooltip(description);
+              skill.setDescription(description);
+            });
+    rebuildWidgets();
+  }
+
+  private void removeSelectedSkillsDescriptionLine() {
+    selectedSkills()
+        .forEach(
+            skill -> {
+              List<MutableComponent> description = skill.getDescription();
+              Objects.requireNonNull(description);
+              description.remove(selectedSubMenu);
+            });
+    saveSelectedSkills();
+    selectSubMenu(-1);
+    rebuildWidgets();
+  }
+
+  private void removeSelectedSkillsDescription() {
+    selectedSkills().forEach(skill -> skill.setDescription(null));
+    saveSelectedSkills();
+    rebuildWidgets();
+  }
+
+  private void addSelectedSkillsDescriptionLine() {
+    selectedSkills()
+        .forEach(
+            skill -> {
+              List<MutableComponent> description = skill.getDescription();
+              if (description == null) {
+                description = new ArrayList<>();
+                skill.setDescription(description);
+              }
+              description.add(Component.empty().withStyle(TooltipHelper.getSkillBonusStyle(true)));
+            });
+    saveSelectedSkills();
+    rebuildWidgets();
   }
 
   private void addTexturesTools() {
@@ -747,7 +924,7 @@ public class SkillTreeEditorScreen extends Screen {
     PassiveSkill skill = getFirstSelectedSkill();
     if (canEdit(PassiveSkill::getBackgroundTexture)) {
       addLabel(0, 0, "Border", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addDropDownList(0, 0, 200, 14, 10, skill.getBackgroundTexture(), SkillTexturesData.BORDERS)
           .setToNameFunc(TooltipHelper::getTextureName)
           .setResponder(
@@ -755,11 +932,11 @@ public class SkillTreeEditorScreen extends Screen {
                 selectedSkills().forEach(s -> s.setBackgroundTexture(value));
                 saveSelectedSkills();
               });
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     if (canEdit(PassiveSkill::getBorderTexture)) {
       addLabel(0, 0, "Tooltip", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addDropDownList(
               0, 0, 200, 14, 10, skill.getBorderTexture(), SkillTexturesData.TOOLTIP_BACKGROUNDS)
           .setToNameFunc(TooltipHelper::getTextureName)
@@ -768,11 +945,11 @@ public class SkillTreeEditorScreen extends Screen {
                 selectedSkills().forEach(s -> s.setBorderTexture(value));
                 saveSelectedSkills();
               });
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
     if (canEdit(PassiveSkill::getIconTexture)) {
       addLabel(0, 0, "Icon", ChatFormatting.GOLD);
-      toolsY += 19;
+      shiftWidgets(0, 19);
       addDropDownList(0, 0, 200, 14, 10, skill.getIconTexture(), SkillTexturesData.ICONS)
           .setToNameFunc(TooltipHelper::getTextureName)
           .setResponder(
@@ -780,7 +957,7 @@ public class SkillTreeEditorScreen extends Screen {
                 selectedSkills().forEach(s -> s.setIconTexture(value));
                 saveSelectedSkills();
               });
-      toolsY += 19;
+      shiftWidgets(0, 19);
     }
   }
 
@@ -985,7 +1162,7 @@ public class SkillTreeEditorScreen extends Screen {
       double mouseX, double mouseY, int mouseButton, double dragAmountX, double dragAmountY) {
     if (mouseButton != 0 && mouseButton != 2) return false;
     if (mouseButton == 0 && hasShiftDown()) {
-      selecting = true;
+      selectingArea = true;
       return true;
     }
     if (mouseButton == 0 && hasControlDown() && !selectedSkills.isEmpty()) {
@@ -1092,8 +1269,11 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   public Button addButton(int x, int y, int width, int height, String message) {
-    return addRenderableWidget(
-        new Button(toolsX + x, toolsY + y, width, height, Component.literal(message)));
+    return addButton(x, y, width, height, Component.literal(message));
+  }
+
+  public Button addButton(int x, int y, int width, int height, Component message) {
+    return addRenderableWidget(new Button(toolsX + x, toolsY + y, width, height, message));
   }
 
   public ConfirmationButton addConfirmationButton(
@@ -1173,6 +1353,19 @@ public class SkillTreeEditorScreen extends Screen {
     return true;
   }
 
+  protected boolean sameDescription(PassiveSkill skill, PassiveSkill otherSkill) {
+    if (skill == otherSkill) return true;
+    List<MutableComponent> description = skill.getDescription();
+    List<MutableComponent> otherDescription = otherSkill.getDescription();
+    if (description == null && otherDescription == null) return true;
+    if (description == null || otherDescription == null) return false;
+    if (description.size() != otherDescription.size()) return false;
+    for (int i = 0; i < description.size(); i++) {
+      if (!description.get(i).equals(otherDescription.get(i))) return false;
+    }
+    return true;
+  }
+
   protected final boolean canEdit(Function<PassiveSkill, ?> function) {
     return selectedSkills().map(function).distinct().count() <= 1;
   }
@@ -1184,6 +1377,7 @@ public class SkillTreeEditorScreen extends Screen {
     BUTTON,
     CONNECTIONS,
     TAGS,
+    DESCRIPTION,
     NODE
   }
 }

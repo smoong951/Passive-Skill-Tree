@@ -20,6 +20,10 @@ import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -48,6 +52,7 @@ public class NetworkHelper {
     writeResourceLocations(buf, skill.getLongConnections());
     writeResourceLocations(buf, skill.getOneWayConnections());
     writeTags(buf, skill.getTags());
+    writeDescription(buf, skill.getDescription());
   }
 
   public static PassiveSkill readPassiveSkill(FriendlyByteBuf buf) {
@@ -68,6 +73,7 @@ public class NetworkHelper {
     readResourceLocations(buf).forEach(skill.getOneWayConnections()::add);
     skill.getTags().clear();
     skill.getTags().addAll(readTags(buf));
+    skill.setDescription(readDescription(buf));
     return skill;
   }
 
@@ -192,6 +198,55 @@ public class NetworkHelper {
     SkillBonus.Serializer serializer = PSTRegistries.SKILL_BONUSES.get().getValue(serializerId);
     Objects.requireNonNull(serializer);
     return serializer.deserialize(buf);
+  }
+
+  public static void writeDescription(
+      FriendlyByteBuf buf, @Nullable List<MutableComponent> description) {
+    if (description == null) {
+      buf.writeBoolean(false);
+      return;
+    }
+    buf.writeInt(description.size());
+    for (MutableComponent component : description) {
+      writeChatComponent(buf, component);
+    }
+  }
+
+  public static @Nullable List<MutableComponent> readDescription(FriendlyByteBuf buf) {
+    if (!buf.readBoolean()) return null;
+    int size = buf.readInt();
+    List<MutableComponent> description = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      description.add(readChatComponent(buf));
+    }
+    return description;
+  }
+
+  public static void writeChatComponent(FriendlyByteBuf buf, MutableComponent component) {
+    buf.writeUtf(component.getString());
+    buf.writeBoolean(component.getStyle().isBold());
+    buf.writeBoolean(component.getStyle().isItalic());
+    buf.writeBoolean(component.getStyle().isUnderlined());
+    buf.writeBoolean(component.getStyle().isStrikethrough());
+    buf.writeBoolean(component.getStyle().isObfuscated());
+    TextColor textColor = component.getStyle().getColor();
+    buf.writeInt(textColor == null ? -1 : textColor.getValue());
+  }
+
+  public static MutableComponent readChatComponent(FriendlyByteBuf buf) {
+    String text = buf.readUtf();
+    Style style =
+        Style.EMPTY
+            .withBold(buf.readBoolean())
+            .withItalic(buf.readBoolean())
+            .withUnderlined(buf.readBoolean())
+            .withStrikethrough(buf.readBoolean())
+            .withObfuscated(buf.readBoolean());
+    int color = buf.readInt();
+    if (color != -1) {
+      style = style.withColor(color);
+    }
+    return Component.literal(text).withStyle(style);
   }
 
   public static void writePassiveSkillTrees(

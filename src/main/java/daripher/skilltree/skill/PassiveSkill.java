@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -24,6 +26,7 @@ public class PassiveSkill {
   private float positionX, positionY;
   private int buttonSize;
   private boolean isStartingPoint;
+  private @Nullable List<MutableComponent> description;
 
   public PassiveSkill(
       ResourceLocation id,
@@ -159,6 +162,14 @@ public class PassiveSkill {
 
   public @Nonnull String getTitleColor() {
     return titleColor == null ? "" : titleColor;
+  }
+
+  public @Nullable List<MutableComponent> getDescription() {
+    return description;
+  }
+
+  public void setDescription(@Nullable List<MutableComponent> description) {
+    this.description = description;
   }
 
   public void remove(ServerPlayer player) {

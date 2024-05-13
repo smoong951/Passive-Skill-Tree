@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -27,6 +29,7 @@ public class SkillsReloader extends SimpleJsonResourceReloadListener {
       new GsonBuilder()
           .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
           .registerTypeAdapter(SkillBonus.class, new SkillBonusSerializer())
+          .registerTypeAdapter(MutableComponent.class, new Component.Serializer())
           .setPrettyPrinting()
           .create();
   private static final Map<ResourceLocation, PassiveSkill> SKILLS = new HashMap<>();

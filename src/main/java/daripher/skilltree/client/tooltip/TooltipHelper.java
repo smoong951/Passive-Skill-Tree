@@ -150,4 +150,15 @@ public class TooltipHelper {
     components.add(Component.translatable(line).withStyle(component.getStyle()));
     return components;
   }
+
+  @NotNull
+  public static String getTrimmedMessage(Font font, String message, int maxWidth) {
+    if (font.width(message) > maxWidth) {
+      while (font.width(message + "...") > maxWidth) {
+        message = message.substring(0, message.length() - 1);
+      }
+      message += "...";
+    }
+    return message;
+  }
 }

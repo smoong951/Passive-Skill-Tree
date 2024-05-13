@@ -5,7 +5,6 @@ import daripher.skilltree.client.tooltip.TooltipHelper;
 import daripher.skilltree.init.PSTRegistries;
 import java.util.Objects;
 import java.util.function.Consumer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,10 +36,6 @@ public interface SkillBonus<T extends SkillBonus<T>> extends Comparable<SkillBon
   }
 
   MutableComponent getTooltip();
-
-  default MutableComponent getAdvancedTooltip() {
-    return Component.empty();
-  }
 
   default void gatherInfo(Consumer<MutableComponent> consumer) {
     TooltipHelper.consumeTranslated(getDescriptionId() + ".info", consumer);
