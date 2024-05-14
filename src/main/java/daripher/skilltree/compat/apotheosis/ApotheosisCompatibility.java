@@ -24,6 +24,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.NotNull;
 import shadows.apotheosis.Apoth;
 import shadows.apotheosis.Apotheosis;
 import shadows.apotheosis.adventure.affix.AffixHelper;
@@ -93,10 +94,18 @@ public enum ApotheosisCompatibility {
   public int getSockets(ItemStack stack, @Nullable Player player) {
     int playerSockets = player == null ? 0 : PlayerHelper.getPlayerSockets(stack, player);
     int sockets = SocketHelper.getSockets(stack);
-    int gems = SocketHelper.getActiveGems(stack).size();
+    int gems = getActiveGems(stack).size();
     playerSockets -= gems;
     if (playerSockets < 0) playerSockets = 0;
     return sockets + playerSockets;
+  }
+
+  @NotNull
+  private static List<Gem> getActiveGems(ItemStack stack) {
+    return SocketHelper.getGems(stack).stream()
+        .map(GemItem::getGem)
+        .filter(Objects::nonNull)
+        .toList();
   }
 
   public boolean hasEmptySockets(ItemStack stack, Player player) {
