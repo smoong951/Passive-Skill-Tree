@@ -587,7 +587,7 @@ public class SkillTreeEditorScreen extends Screen {
       addConfirmationButton(110, 0, 90, 14, "Remove", "Confirm")
           .setPressFunc(b -> removeSelectedSkillsDescriptionLine());
       shiftWidgets(0, 29);
-      if (description == null) {
+      if (description == null || selectedSubMenu > description.size()) {
         selectSubMenu(-1);
         return;
       }
