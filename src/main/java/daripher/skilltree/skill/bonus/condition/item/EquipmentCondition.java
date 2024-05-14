@@ -5,6 +5,7 @@ import com.google.gson.JsonParseException;
 import daripher.skilltree.client.screen.SkillTreeEditorScreen;
 import daripher.skilltree.client.tooltip.TooltipHelper;
 import daripher.skilltree.init.PSTItemConditions;
+import daripher.skilltree.init.PSTTags;
 import java.util.Objects;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -54,11 +55,11 @@ public class EquipmentCondition implements ItemCondition {
   }
 
   public static boolean isRangedWeapon(ItemStack stack) {
-    return isCrossbow(stack) || isBow(stack);
+    return isCrossbow(stack) || isBow(stack) || stack.is(PSTTags.RANGED_WEAPON);
   }
 
   public static boolean isMeleeWeapon(ItemStack stack) {
-    return isSword(stack) || isAxe(stack) || isTrident(stack);
+    return isSword(stack) || isAxe(stack) || isTrident(stack) || stack.is(PSTTags.MELEE_WEAPON);
   }
 
   public static boolean isLeggings(ItemStack stack) {
@@ -113,7 +114,7 @@ public class EquipmentCondition implements ItemCondition {
   }
 
   public static boolean isTool(ItemStack stack) {
-    return stack.getItem() instanceof DiggerItem;
+    return stack.getItem() instanceof DiggerItem || stack.is(Tags.Items.TOOLS);
   }
 
   public static boolean isHoe(ItemStack stack) {

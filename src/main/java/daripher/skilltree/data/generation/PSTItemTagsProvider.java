@@ -10,13 +10,18 @@ import daripher.skilltree.item.ring.RingItem;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 public class PSTItemTagsProvider extends ItemTagsProvider {
+  public static final ResourceLocation KNIVES = new ResourceLocation("forge", "tools/knives");
+
   public PSTItemTagsProvider(
       DataGenerator dataGenerator,
       BlockTagsProvider blockTagsProvider,
@@ -32,6 +37,9 @@ public class PSTItemTagsProvider extends ItemTagsProvider {
     add(PSTTags.QUIVERS, QuiverItem.class);
     add(PSTTags.NUGGETS_COPPER, PSTItems.COPPER_NUGGET.get());
     tag(PSTTags.JEWELRY).addTags(PSTTags.RINGS, PSTTags.NECKLACES);
+    tag(Tags.Items.TOOLS).addOptionalTag(KNIVES);
+    tag(PSTTags.MELEE_WEAPON).addTags(Tags.Items.TOOLS_SWORDS, Tags.Items.TOOLS_AXES, Tags.Items.TOOLS_TRIDENTS);
+    tag(PSTTags.RANGED_WEAPON).addTags(Tags.Items.TOOLS_BOWS, Tags.Items.TOOLS_CROSSBOWS);
   }
 
   private void add(TagKey<Item> itemTag, Class<? extends Item> itemClass) {

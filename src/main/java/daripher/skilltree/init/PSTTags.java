@@ -18,4 +18,8 @@ public class PSTTags {
       ItemTags.create(new ResourceLocation("forge", "curios/jewelry"));
   public static final TagKey<Item> NUGGETS_COPPER =
       ItemTags.create(new ResourceLocation("forge", "nuggets/copper"));
+  public static final TagKey<Item> MELEE_WEAPON =
+      ItemTags.create(new ResourceLocation("skilltree", "melee_weapon"));
+  public static final TagKey<Item> RANGED_WEAPON =
+      ItemTags.create(new ResourceLocation("skilltree", "ranged_weapon"));
 }
