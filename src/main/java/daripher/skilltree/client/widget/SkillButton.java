@@ -191,20 +191,20 @@ public class SkillButton extends Button {
 
   private void addLimitationsTooltip(
       PassiveSkillTree skillTree, ArrayList<MutableComponent> tooltips) {
+    boolean addedLimitTooltip = false;
     for (String tag : skill.getTags()) {
       int limit = skillTree.getSkillLimitations().getOrDefault(tag, 0);
-      if (limit > 0) {
-        AtomicReference<MutableComponent> tagTooltip =
-            new AtomicReference<>(Component.literal(tag));
-        TooltipHelper.consumeTranslated("skill.tag.%s.name".formatted(tag), tagTooltip::set);
-        tagTooltip.set(Component.literal(limit + " " + tagTooltip.get().getString()));
-        tagTooltip.set(tagTooltip.get().withStyle(TooltipHelper.getItemBonusStyle(true)));
-        MutableComponent tooltip = Component.translatable("skill.limitation", tagTooltip.get());
-        tooltip = tooltip.withStyle(TooltipHelper.getSkillBonusStyle(true));
-        tooltips.add(tooltip);
-      }
+      if (limit <= 0) continue;
+      addedLimitTooltip = true;
+      AtomicReference<MutableComponent> tagTooltip = new AtomicReference<>(Component.literal(tag));
+      TooltipHelper.consumeTranslated("skill.tag.%s.name".formatted(tag), tagTooltip::set);
+      tagTooltip.set(Component.literal(limit + " " + tagTooltip.get().getString()));
+      tagTooltip.set(tagTooltip.get().withStyle(TooltipHelper.getItemBonusStyle(true)));
+      MutableComponent tooltip = Component.translatable("skill.limitation", tagTooltip.get());
+      tooltip = tooltip.withStyle(TooltipHelper.getSkillBonusStyle(true));
+      tooltips.add(tooltip);
     }
-    if (!skill.getTags().isEmpty()) {
+    if (addedLimitTooltip) {
       tooltips.add(Component.empty());
     }
   }

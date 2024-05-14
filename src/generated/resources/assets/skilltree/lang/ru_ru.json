@@ -41,6 +41,8 @@
   "event_listener.skilltree.item_used": "%s когда вы используете %s",
   "event_listener.skilltree.on_kill": "%s при убийстве",
   "event_listener.skilltree.on_kill.damage": "%s при убийстве через %s",
+  "event_listener.skilltree.skill_learned": "%s когда вы изучаете это умение",
+  "event_listener.skilltree.skill_removed": "%s когда вы забудете это умение",
   "experience.source.fishing": "за Рыбалку",
   "experience.source.mobs": "с Существ",
   "experience.source.ore": "из Руды",

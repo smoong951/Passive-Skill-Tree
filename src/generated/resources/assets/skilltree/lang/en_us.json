@@ -41,6 +41,8 @@
   "event_listener.skilltree.item_used": "%s when you use %s",
   "event_listener.skilltree.on_kill": "%s on kill",
   "event_listener.skilltree.on_kill.damage": "%s on kill with %s",
+  "event_listener.skilltree.skill_learned": "%s when you learn this",
+  "event_listener.skilltree.skill_removed": "%s when this skill is removed",
   "experience.source.fishing": "Fishing",
   "experience.source.mobs": "Mobs",
   "experience.source.ore": "Ores",
