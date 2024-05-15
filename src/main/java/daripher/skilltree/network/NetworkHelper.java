@@ -66,12 +66,11 @@ public class NetworkHelper {
     skill.setPosition(buf.readFloat(), buf.readFloat());
     skill.setTitle(buf.readUtf());
     skill.setTitleColor(buf.readUtf());
-    readResourceLocations(buf).forEach(skill.getDirectConnections()::add);
+    skill.getDirectConnections().addAll(readResourceLocations(buf));
     skill.setConnectedTree(readNullableResourceLocation(buf));
-    readSkillBonuses(buf).forEach(skill::addSkillBonus);
-    readResourceLocations(buf).forEach(skill.getLongConnections()::add);
-    readResourceLocations(buf).forEach(skill.getOneWayConnections()::add);
-    skill.getTags().clear();
+    skill.getBonuses().addAll(readSkillBonuses(buf));
+    skill.getLongConnections().addAll(readResourceLocations(buf));
+    skill.getOneWayConnections().addAll(readResourceLocations(buf));
     skill.getTags().addAll(readTags(buf));
     skill.setDescription(readDescription(buf));
     return skill;
@@ -202,10 +201,8 @@ public class NetworkHelper {
 
   public static void writeDescription(
       FriendlyByteBuf buf, @Nullable List<MutableComponent> description) {
-    if (description == null) {
-      buf.writeBoolean(false);
-      return;
-    }
+    buf.writeBoolean(description != null);
+    if (description == null) return;
     buf.writeInt(description.size());
     for (MutableComponent component : description) {
       writeChatComponent(buf, component);
@@ -224,12 +221,13 @@ public class NetworkHelper {
 
   public static void writeChatComponent(FriendlyByteBuf buf, MutableComponent component) {
     buf.writeUtf(component.getString());
-    buf.writeBoolean(component.getStyle().isBold());
-    buf.writeBoolean(component.getStyle().isItalic());
-    buf.writeBoolean(component.getStyle().isUnderlined());
-    buf.writeBoolean(component.getStyle().isStrikethrough());
-    buf.writeBoolean(component.getStyle().isObfuscated());
-    TextColor textColor = component.getStyle().getColor();
+    Style style = component.getStyle();
+    buf.writeBoolean(style.isBold());
+    buf.writeBoolean(style.isItalic());
+    buf.writeBoolean(style.isUnderlined());
+    buf.writeBoolean(style.isStrikethrough());
+    buf.writeBoolean(style.isObfuscated());
+    TextColor textColor = style.getColor();
     buf.writeInt(textColor == null ? -1 : textColor.getValue());
   }
 
