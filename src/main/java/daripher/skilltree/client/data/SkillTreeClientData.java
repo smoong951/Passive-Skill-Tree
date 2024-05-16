@@ -7,6 +7,7 @@ import daripher.skilltree.data.reloader.SkillsReloader;
 import daripher.skilltree.skill.PassiveSkill;
 import daripher.skilltree.skill.PassiveSkillTree;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -81,7 +82,7 @@ public class SkillTreeClientData {
   private static void generatePackMcmetaFile(File file) {
     try {
       BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-      writer.write(
+      String contents =
           """
           {
               "pack": {
@@ -90,7 +91,8 @@ public class SkillTreeClientData {
                   "forge:data_pack_format": 10
               }
           }
-          """);
+          """;
+      writer.write(contents);
       writer.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -113,7 +115,8 @@ public class SkillTreeClientData {
   }
 
   public static void saveEditorSkillTree(PassiveSkillTree skillTree) {
-    try (FileWriter writer = new FileWriter(getSkillTreeSaveFile(skillTree.getId()))) {
+    File file = getSkillTreeSaveFile(skillTree.getId());
+    try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
       SkillTreesReloader.GSON.toJson(skillTree, writer);
     } catch (JsonIOException | IOException e) {
       e.printStackTrace();
@@ -138,7 +141,8 @@ public class SkillTreeClientData {
   }
 
   public static void saveEditorSkill(PassiveSkill skill) {
-    try (FileWriter writer = new FileWriter(getSkillSaveFile(skill.getId()))) {
+    File file = getSkillSaveFile(skill.getId());
+    try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
       SkillsReloader.GSON.toJson(skill, writer);
     } catch (JsonIOException | IOException e) {
       e.printStackTrace();
