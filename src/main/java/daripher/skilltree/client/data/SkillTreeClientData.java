@@ -192,7 +192,7 @@ public class SkillTreeClientData {
   }
 
   private static <T> T readFromFile(Class<T> objectType, File file) throws IOException {
-    try (JsonReader reader = new JsonReader(new FileReader(file))) {
+    try (JsonReader reader = new JsonReader(new FileReader(file, StandardCharsets.UTF_8))) {
       return SkillsReloader.GSON.fromJson(reader, objectType);
     }
   }
