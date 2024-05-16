@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 public interface EventListenerBonus<T> extends SkillBonus<EventListenerBonus<T>> {
   @Override
   default void onSkillLearned(ServerPlayer player, boolean firstTime) {
-    if (getEventListener() instanceof SkillLearnedEventListener listener) {
+    if (firstTime && getEventListener() instanceof SkillLearnedEventListener listener) {
       listener.onEvent(player, this);
     }
   }
