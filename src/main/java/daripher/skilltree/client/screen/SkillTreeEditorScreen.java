@@ -33,6 +33,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -505,56 +506,96 @@ public class SkillTreeEditorScreen extends Screen {
   }
 
   private void addTagsToolsButtons() {
-    addButton(0, 0, 90, 14, "Back").setPressFunc(b -> selectTools(Tools.MAIN));
+    Button backButton = addButton(0, 0, 90, 14, "Back");
     shiftWidgets(0, 29);
-    if (selectedSkills.isEmpty()) return;
-    PassiveSkill skill = getFirstSelectedSkill();
-    if (selectedSkills().anyMatch(otherSkill -> !sameTags(skill, otherSkill))) return;
-    addLabel(0, 0, "Tag", ChatFormatting.GOLD);
-    addLabel(110, 0, "Limit", ChatFormatting.GOLD);
-    shiftWidgets(0, 19);
-    List<String> tags = getFirstSelectedSkill().getTags();
-    for (int i = 0; i < tags.size(); i++) {
-      int index = i;
-      addTextField(0, 0, 90, 14, tags.get(i))
-          .setResponder(
-              v -> {
-                selectedSkills().forEach(s -> s.getTags().set(index, v));
-                saveSelectedSkills();
-              });
-      int limit = skillTree.getSkillLimitations().getOrDefault(tags.get(i), 0);
-      addNumericTextField(110, 0, 40, 14, limit)
-          .setNumericFilter(d -> d >= 0)
-          .setNumericResponder(
-              v -> {
-                String tag = getFirstSelectedSkill().getTags().get(index);
-                if (v == 0) {
-                  skillTree.getSkillLimitations().remove(tag);
-                } else {
-                  skillTree.getSkillLimitations().put(tag, v.intValue());
+    if (selectedSubMenu == -1) {
+      backButton.setPressFunc(b -> selectTools(Tools.MAIN));
+      if (selectedSkills.isEmpty()) return;
+      PassiveSkill skill = getFirstSelectedSkill();
+      if (selectedSkills().anyMatch(otherSkill -> !sameTags(skill, otherSkill))) return;
+      addLabel(0, 0, "Tag List", ChatFormatting.GOLD);
+      shiftWidgets(0, 19);
+      List<String> tags = skill.getTags();
+      for (int i = 0; i < tags.size(); i++) {
+        int index = i;
+        addTextField(0, 0, 200, 14, tags.get(i))
+            .setResponder(
+                v -> {
+                  selectedSkills().forEach(s -> s.getTags().set(index, v));
+                  saveSelectedSkills();
+                });
+        shiftWidgets(0, 19);
+      }
+      toolsY += 10;
+      addButton(0, 0, 90, 14, "Add")
+          .setPressFunc(
+              b -> {
+                String name = "New Tag";
+                while (skill.getTags().contains(name)) {
+                  name += "1";
                 }
+                String finalName = name;
+                selectedSkills().forEach(s -> s.getTags().add(finalName));
+                saveSelectedSkills();
+                rebuildWidgets();
+              });
+      if (!tags.isEmpty()) {
+        addButton(110, 0, 90, 14, "Remove")
+            .setPressFunc(
+                b -> {
+                  selectedSkills().forEach(s -> s.getTags().remove(tags.size() - 1));
+                  saveSelectedSkills();
+                  rebuildWidgets();
+                });
+      }
+      shiftWidgets(0, 19);
+      addButton(0, 0, 200, 14, "Tree Limitations").setPressFunc(b -> selectSubMenu(0));
+      shiftWidgets(0, 19);
+    } else {
+      backButton.setPressFunc(b -> selectSubMenu(-1));
+      Map<String, Integer> limitations = skillTree.getSkillLimitations();
+      List<String> tags = limitations.keySet().stream().toList();
+      List<Pair<TextField, NumericTextField>> editors = new ArrayList<>();
+      Runnable saveFunc =
+          () -> {
+            limitations.clear();
+            for (Pair<TextField, NumericTextField> pair : editors) {
+              int limit = (int) pair.getValue().getNumericValue();
+              if (limit == 0) continue;
+              String tag = pair.getKey().getValue();
+              limitations.put(tag, limit);
+            }
+            SkillTreeClientData.saveEditorSkillTree(skillTree);
+          };
+      for (int i = 0; i < limitations.size(); i++) {
+        TextField tagEditor = addTextField(0, 0, 155, 14, tags.get(i));
+        NumericTextField limitEditor =
+            addNumericTextField(160, 0, 40, 14, limitations.get(tags.get(i)));
+        tagEditor.setResponder(v -> saveFunc.run());
+        editors.add(Pair.of(tagEditor, limitEditor));
+        limitEditor
+            .setNumericFilter(d -> d >= 0)
+            .setNumericResponder(
+                v -> {
+                  saveFunc.run();
+                  if (v == 0) rebuildWidgets();
+                });
+        shiftWidgets(0, 19);
+      }
+      shiftWidgets(0, 10);
+      addButton(0, 0, 90, 14, "Add")
+          .setPressFunc(
+              b -> {
+                String name = "New Tag";
+                while (limitations.containsKey(name)) {
+                  name += "1";
+                }
+                limitations.put(name, 1);
+                rebuildWidgets();
                 SkillTreeClientData.saveEditorSkillTree(skillTree);
               });
       shiftWidgets(0, 19);
     }
-    toolsY += 10;
-    addButton(0, 0, 90, 14, "Add")
-        .setPressFunc(
-            b -> {
-              selectedSkills().forEach(s -> s.getTags().add(""));
-              saveSelectedSkills();
-              rebuildWidgets();
-            });
-    if (!tags.isEmpty()) {
-      addButton(110, 0, 90, 14, "Remove")
-          .setPressFunc(
-              b -> {
-                selectedSkills().forEach(s -> s.getTags().remove(tags.size() - 1));
-                saveSelectedSkills();
-                rebuildWidgets();
-              });
-    }
-    shiftWidgets(0, 19);
   }
 
   private void addDescriptionsToolsButtons() {
