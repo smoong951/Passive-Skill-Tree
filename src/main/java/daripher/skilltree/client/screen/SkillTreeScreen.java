@@ -420,8 +420,9 @@ public class SkillTreeScreen extends Screen {
   }
 
   private boolean canLearnSkill(PassiveSkill skill) {
+    Map<String, Integer> limitations = skillTree.getSkillLimitations();
     for (String tag : skill.getTags()) {
-      int limit = skillTree.getSkillLimitations().get(tag);
+      int limit = limitations.getOrDefault(tag, 0);
       if (limit > 0 && getLearnedSkillsWithTag(tag) >= limit) return false;
     }
     return true;
