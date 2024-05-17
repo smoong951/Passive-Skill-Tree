@@ -83,14 +83,21 @@ public final class MobEffectBonus implements EventListenerBonus<MobEffectBonus> 
   @Override
   public MutableComponent getTooltip() {
     Component effectDescription = TooltipHelper.getEffectInstanceTooltip(effect);
-    String durationDescription = StringUtil.formatTickDuration(effect.getDuration());
+    int duration = effect.getDuration();
     String targetDescription = eventListener.getTarget().name().toLowerCase();
     String bonusDescription = getDescriptionId() + "." + targetDescription;
     if (chance < 1) {
       bonusDescription += ".chance";
     }
-    MutableComponent tooltip =
-        Component.translatable(bonusDescription, effectDescription, durationDescription);
+    MutableComponent tooltip;
+    if (duration > 0) {
+      Component durationDescription =
+          Component.translatable(
+              getDescriptionId() + ".duration", StringUtil.formatTickDuration(duration));
+      tooltip = Component.translatable(bonusDescription, effectDescription, durationDescription);
+    } else {
+      tooltip = Component.translatable(bonusDescription, effectDescription, "");
+    }
     if (chance < 1) {
       tooltip =
           TooltipHelper.getSkillBonusTooltip(

@@ -65,6 +65,8 @@ public class PSTSkillBonuses {
       REGISTRY.register("cant_use_item", CantUseItemBonus.Serializer::new);
   public static final RegistryObject<SkillBonus.Serializer> HEALING =
       REGISTRY.register("healing", HealingBonus.Serializer::new);
+  public static final RegistryObject<SkillBonus.Serializer> INFLICT_DAMAGE =
+      REGISTRY.register("inflict_damage", InflictDamageBonus.Serializer::new);
 
   @SuppressWarnings("rawtypes")
   public static List<SkillBonus> bonusList() {

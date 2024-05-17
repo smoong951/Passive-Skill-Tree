@@ -301,15 +301,20 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add(PSTSkillBonuses.ARROW_RETRIEVAL.get(), "Шанс вернуть стрелы");
     add(PSTSkillBonuses.HEALTH_RESERVATION.get(), "Удержание здоровья");
     add(PSTSkillBonuses.ALL_ATTRIBUTES.get(), "Все характеристики");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "player", "Вы получаете %s на %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "player.chance", "Шанс получить %s на %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy", "Вы накладываете %s на %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy.chance", "Шанс наложить %s на %s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "player", "Вы получаете %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "player.chance", "Шанс получить %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy", "Вы накладываете %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy.chance", "Шанс наложить %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "duration", " на %s");
     add(PSTSkillBonuses.CANT_USE_ITEM.get(), "Нельзя использовать %s");
     add(PSTSkillBonuses.HEALING.get(), "player", "Вы восстанавливаете %s здоровья");
     add(PSTSkillBonuses.HEALING.get(), "player.chance", "Шанс восстановить %s здоровья");
     add(PSTSkillBonuses.HEALING.get(), "enemy", "Враги восстанавливают %s здоровья");
     add(PSTSkillBonuses.HEALING.get(), "enemy.chance", "Шанс для врагов восстановить %s здоровья");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "player", "Вы получаете %s урона");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "player.chance", "Шанс получить %s урона");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "enemy", "Вы наносите %s урона");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "enemy.chance", "Шанс нанести %s урона");
     // item bonuses
     add(PSTItemBonuses.SOCKETS.get(), "+%d Гнезда для Самоцветов");
     add(PSTItemBonuses.DURABILITY.get(), "Прочность");
@@ -381,19 +386,26 @@ public class PSTRussianTranslationProvider extends PSTTranslationProvider {
     add(PSTLivingConditions.CROUCHING.get(), "target.target", "Цель крадется");
     add(PSTLivingConditions.CROUCHING.get(), "%s если %s");
     // event listeners
-    add(PSTEventListeners.ATTACK.get(), "%s когда вы наносите %s");
-    add(PSTEventListeners.BLOCK.get(), "%s когда вы блокируете %s");
-    add(PSTEventListeners.EVASION.get(), "%s когда вы уклоняетесь от атаки");
+    add(PSTEventListeners.ATTACK.get(), "%s при атаке");
+    add(PSTEventListeners.ATTACK.get(), "damage", "%s при атаке %s");
+    add(PSTEventListeners.BLOCK.get(), "%s при блоке");
+    add(PSTEventListeners.BLOCK.get(), "damage", "%s при блоке %s");
+    add(PSTEventListeners.EVASION.get(), "%s при уклонении");
     add(PSTEventListeners.ITEM_USED.get(), "%s когда вы используете %s");
     add(PSTEventListeners.DAMAGE_TAKEN.get(), "%s когда вы получаете %s");
     add(PSTEventListeners.ON_KILL.get(), "%s при убийстве");
-    add(PSTEventListeners.ON_KILL.get(), "damage", "%s при убийстве через %s");
-    add(PSTEventListeners.SKILL_LEARNED.get(), "%s когда вы изучаете это умение");
+    add(PSTEventListeners.ON_KILL.get(), "damage", "%s при убийстве %s");
+    add(PSTEventListeners.SKILL_LEARNED.get(), "%s при изучении этого умения");
     add(PSTEventListeners.SKILL_REMOVED.get(), "%s когда вы забудете это умение");
     // damage conditions
     add(PSTDamageConditions.PROJECTILE.get(), "Урон снарядами");
+    add(PSTDamageConditions.PROJECTILE.get(), "type", "снарядами");
+    add(PSTDamageConditions.PROJECTILE.get(), "type.blocked", "снаряда");
     add(PSTDamageConditions.MELEE.get(), "Урон в ближнем бою");
+    add(PSTDamageConditions.MELEE.get(), "type", "в ближнем бою");
     add(PSTDamageConditions.MAGIC.get(), "Урон магией");
+    add(PSTDamageConditions.MAGIC.get(), "type", "магией");
+    add(PSTDamageConditions.MAGIC.get(), "type.blocked", "магии");
     add(PSTDamageConditions.NONE.get(), "Урон");
     // enchantment conditions
     add(PSTEnchantmentConditions.WEAPON.get(), "Зачарование оружия");

@@ -21,6 +21,10 @@ public interface DamageCondition {
     return Component.translatable(getDescriptionId());
   }
 
+  default MutableComponent getTooltip(String type) {
+    return Component.translatable(getDescriptionId() + "." + type);
+  }
+
   Serializer getSerializer();
 
   interface Serializer extends daripher.skilltree.data.serializers.Serializer<DamageCondition> {

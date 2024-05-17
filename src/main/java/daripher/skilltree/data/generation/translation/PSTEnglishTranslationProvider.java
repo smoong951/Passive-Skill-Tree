@@ -299,15 +299,20 @@ public class PSTEnglishTranslationProvider extends PSTTranslationProvider {
     add(PSTSkillBonuses.ARROW_RETRIEVAL.get(), "Arrow retrieval chance");
     add(PSTSkillBonuses.HEALTH_RESERVATION.get(), "Health Reservation");
     add(PSTSkillBonuses.ALL_ATTRIBUTES.get(), "All Attributes");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "player", "Gain %s for %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "player.chance", "Chance to gain %s for %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy", "Inflict %s for %s");
-    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy.chance", "Chance to inflict %s for %s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "player", "Gain %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "player.chance", "Chance to gain %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy", "Inflict %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "enemy.chance", "Chance to inflict %s%s");
+    add(PSTSkillBonuses.MOB_EFFECT.get(), "duration", " for %s");
     add(PSTSkillBonuses.CANT_USE_ITEM.get(), "Can not use %s");
     add(PSTSkillBonuses.HEALING.get(), "player", "Recover %s life");
     add(PSTSkillBonuses.HEALING.get(), "player.chance", "Chance to recover %s life");
     add(PSTSkillBonuses.HEALING.get(), "enemy", "Enemies recover %s life");
     add(PSTSkillBonuses.HEALING.get(), "enemy.chance", "Chance for enemies to recover %s life");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "player", "Take %s damage");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "player.chance", "Chance to take %s damage");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "enemy", "Inflict %s damage");
+    add(PSTSkillBonuses.INFLICT_DAMAGE.get(), "enemy.chance", "Chance to inflict %s damage");
     // item bonuses
     add(PSTItemBonuses.SOCKETS.get(), "+%d Gem Sockets");
     add(PSTItemBonuses.DURABILITY.get(), "Durability");
@@ -379,19 +384,24 @@ public class PSTEnglishTranslationProvider extends PSTTranslationProvider {
     add(PSTLivingConditions.CROUCHING.get(), "target.target", "Target is");
     add(PSTLivingConditions.CROUCHING.get(), "%s if %s crouching");
     // event listeners
-    add(PSTEventListeners.ATTACK.get(), "%s when you deal %s");
-    add(PSTEventListeners.BLOCK.get(), "%s when you block %s");
-    add(PSTEventListeners.EVASION.get(), "%s when you evade an attack");
-    add(PSTEventListeners.ITEM_USED.get(), "%s when you use %s");
+    add(PSTEventListeners.ATTACK.get(), "%s on hit");
+    add(PSTEventListeners.ATTACK.get(), "damage", "%s on %s hit");
+    add(PSTEventListeners.BLOCK.get(), "%s on block");
+    add(PSTEventListeners.BLOCK.get(), "damage", "%s on %s block");
+    add(PSTEventListeners.EVASION.get(), "%s on evasion");
+    add(PSTEventListeners.ITEM_USED.get(), "%s on %s use");
     add(PSTEventListeners.DAMAGE_TAKEN.get(), "%s when you take %s");
     add(PSTEventListeners.ON_KILL.get(), "%s on kill");
-    add(PSTEventListeners.ON_KILL.get(), "damage", "%s on kill with %s");
+    add(PSTEventListeners.ON_KILL.get(), "damage", "%s on %s kill");
     add(PSTEventListeners.SKILL_LEARNED.get(), "%s when you learn this");
     add(PSTEventListeners.SKILL_REMOVED.get(), "%s when this skill is removed");
     // damage conditions
     add(PSTDamageConditions.PROJECTILE.get(), "Projectile Damage");
+    add(PSTDamageConditions.PROJECTILE.get(), "type", "Projectile");
     add(PSTDamageConditions.MELEE.get(), "Melee Damage");
+    add(PSTDamageConditions.MELEE.get(), "type", "Melee");
     add(PSTDamageConditions.MAGIC.get(), "Magic Damage");
+    add(PSTDamageConditions.MAGIC.get(), "type", "Magic");
     add(PSTDamageConditions.NONE.get(), "Damage");
     // enchantment conditions
     add(PSTEnchantmentConditions.WEAPON.get(), "Weapon Enchantments");
